@@ -24,6 +24,12 @@
     <Generator>MSBuild:Compile</Generator>
     <SubType>Designer</SubType>
   </Page>
+  <Page Include="Views\StatusView.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </Page>
+  <Page Include="Views\SyslogView.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </Page>
   <Compile Include="App.xaml.cs">
     <DependentUpon>App.xaml</DependentUpon>
     <SubType>Code</SubType>
@@ -32,6 +38,11 @@
     <DependentUpon>MainWindow.xaml</DependentUpon>
     <SubType>Code</SubType>
   </Compile>
+  <Compile Include="ViewModels\MainViewModel.cs" />
+  <Compile Include="ViewModels\StatusViewModel.cs" />
+  <Compile Include="ViewModels\SyslogViewModel.cs" />
+  <Compile Include="Views\StatusView.xaml.cs" />
+  <Compile Include="Views\SyslogView.xaml.cs" />
 </ItemGroup>
   
   <ItemGroup>

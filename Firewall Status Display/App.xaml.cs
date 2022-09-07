@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Windows;
+using Telerik.Windows.Controls;
 
 namespace Firewall_Status_Display
 {
@@ -14,7 +15,10 @@ namespace Firewall_Status_Display
     {
         public App()
         {
-           this.InitializeComponent();
+            // Set theme here
+            StyleManager.ApplicationTheme = new Office2016Theme();
+
+            this.InitializeComponent();
         }
     }
 }
