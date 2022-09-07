@@ -1,0 +1,49 @@
+﻿
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Firewall_Status_Display</RootNamespace>
+    <EnableDefaultItems>False</EnableDefaultItems>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <ApplicationIcon>icons8-data-soft-fill-70.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Telerik.UI.for.Wpf.60.Xaml" Version="2022.2.621" />
+  </ItemGroup>
+  
+  <ItemGroup>
+  <ApplicationDefinition Include="App.xaml">
+    <Generator>MSBuild:Compile</Generator>
+    <SubType>Designer</SubType>
+  </ApplicationDefinition>
+  <Page Include="MainWindow.xaml">
+    <Generator>MSBuild:Compile</Generator>
+    <SubType>Designer</SubType>
+  </Page>
+  <Compile Include="App.xaml.cs">
+    <DependentUpon>App.xaml</DependentUpon>
+    <SubType>Code</SubType>
+  </Compile>
+  <Compile Include="MainWindow.xaml.cs">
+    <DependentUpon>MainWindow.xaml</DependentUpon>
+    <SubType>Code</SubType>
+  </Compile>
+</ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="icons8-data-soft-fill-70.ico" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Resource Include="Images\icons8-data-soft-fill-70.ico" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Resource Include="Images\icons8-data-soft-fill-70.png" />
+  </ItemGroup>
+
+</Project>

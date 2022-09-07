@@ -1,0 +1,12 @@
+﻿<Window x:Class="Firewall_Status_Display.MainWindow"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
+                Title="MainWindow" Height="350" Width="525"
+                Closing="Window_Closing">
+        <Grid>
+            <!-- Icon source: https://icons8.com/icon/hkmFpevNcYPV/data -->
+        <telerik:RadNotifyIcon x:Name="icon" TrayIconSource="/Images/icons8-data-soft-fill-70.ico" TooltipContent="Firewall Status Display"/>
+            <TextBlock Text="Testing!"></TextBlock>
+        </Grid>
+</Window>
