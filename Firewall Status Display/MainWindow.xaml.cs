@@ -1,4 +1,5 @@
-﻿using Firewall_Status_Display.ViewModels;
+﻿using Firewall_Status_Display.Services;
+using Firewall_Status_Display.ViewModels;
 using Firewall_Status_Display.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -25,7 +26,9 @@ namespace Firewall_Status_Display
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _services;
-        public MainWindow(IServiceProvider services)
+        private readonly ISyslogReciever _syslogReciever;
+        public MainWindow(IServiceProvider services,
+                            ISyslogReciever syslogReciever)
         {
             var res = App.Current.Resources;
 
@@ -43,7 +46,9 @@ namespace Firewall_Status_Display
 
             // Set current view
             navigationView.SelectedIndex = 0;
-            //vm.CurrentView = vm.ViewModelDict["Status"];
+
+            // Set up UDP listener for when window loads
+            _syslogReciever = syslogReciever;
 
         }
 
@@ -66,7 +71,6 @@ namespace Firewall_Status_Display
                 icon.ShowBalloonTip();
                 
             }
-
 
             // Cancel the close event so we don't exit the program
             e.Cancel = true;
@@ -100,6 +104,18 @@ namespace Firewall_Status_Display
             // Change the current navigation content pane
             vm.CurrentView = vm.ViewModelDict[selectedItemText];
 
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            _syslogReciever.StartAsync();
+
+            _syslogReciever.DataRecievedEvent += _syslogReciever_DataRecievedEvent;
+        }
+
+        private void _syslogReciever_DataRecievedEvent(object sender, RecievedDataArgs args)
+        {
+            MessageBox.Show(System.Text.Encoding.UTF8.GetString(args.RecievedBytes, 0, args.RecievedBytes.Length));
         }
     }
 }

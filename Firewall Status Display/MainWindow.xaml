@@ -5,6 +5,7 @@
                 xmlns:local="clr-namespace:Firewall_Status_Display"
                 xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"      
                 Title="Firewall Status Display" Height="350" Width="525"
+                Loaded="Window_Loaded"
                 Closing="Window_Closing"
                 DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}">
 

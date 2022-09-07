@@ -1,4 +1,5 @@
-﻿using Firewall_Status_Display.ViewModels;
+﻿using Firewall_Status_Display.Services;
+using Firewall_Status_Display.ViewModels;
 using Firewall_Status_Display.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,6 +41,9 @@ namespace Firewall_Status_Display
                     services.AddSingleton<SyslogViewModel>();
                     services.AddSingleton<FirewallViewModel>();
                     services.AddSingleton<SettingsViewModel>();
+
+                    // Other services
+                    services.AddSingleton<ISyslogReciever, SyslogReciever>();
                 })
                 .Build();
         }
