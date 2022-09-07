@@ -4,11 +4,17 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Telerik.Windows.Controls;
 
 namespace Firewall_Status_Display.ViewModels
 {
-    internal class SyslogViewModel : INotifyPropertyChanged
+    public class SyslogViewModel : ViewModelBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public string Content { get; set; }
+        public SyslogViewModel()
+        {
+            Content = "Syslog view";
+        }
+
     }
 }

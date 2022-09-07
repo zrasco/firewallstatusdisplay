@@ -1,11 +1,16 @@
 ﻿<Application x:Class="Firewall_Status_Display.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
-    StartupUri="MainWindow.xaml">
+    xmlns:local="clr-namespace:Firewall_Status_Display"
+    xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"
+    xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation">
     <Application.Resources>
-      <ResourceDictionary>
+        <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <!-- Keys must be put in here instead of in the dictionary directly *eyeroll -->
+                    <vm:ViewModelLocator x:Key="Locator" />
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -5,21 +5,18 @@
                 xmlns:local="clr-namespace:Firewall_Status_Display"
                 xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"      
                 Title="Firewall Status Display" Height="350" Width="525"
-                Closing="Window_Closing">
+                Closing="Window_Closing"
+                DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}">
 
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
     <Grid>
-            <!-- Icon source: https://icons8.com/icon/hkmFpevNcYPV/data -->
+        <!-- Icon source: https://icons8.com/icon/hkmFpevNcYPV/data -->
         <!--
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
         -->
-
-        <telerik:RadNavigationView x:Name="navigationView" CompactModeThresholdWidth="200" ExpandedModeThresholdWidth="400">
+        <telerik:RadNavigationView x:Name="navigationView" CompactModeThresholdWidth="200" ExpandedModeThresholdWidth="400" SelectionChanged="navigationView_SelectionChanged">
             <!-- Menu items -->
             <telerik:RadNavigationView.Items>
                 <telerik:RadNavigationViewItem Content="Status">
@@ -42,15 +39,14 @@
                         <telerik:RadGlyph Glyph="&#xe13a;" FontSize="20" />
                     </telerik:RadNavigationViewItem.Icon>
                 </telerik:RadNavigationViewItem>
-            </telerik:RadNavigationView.Items>            
-            
+            </telerik:RadNavigationView.Items>
+
             <!-- Content pane -->
             <telerik:RadNavigationView.Content>
-                <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}">
-                    
+                <ContentControl Grid.Column="1" Content="{Binding CurrentView, Mode=TwoWay}">
                 </ContentControl>
             </telerik:RadNavigationView.Content>
-            
+
             <!-- Footer with settings item -->
             <!--
             <telerik:RadNavigationView.PaneFooter>
@@ -62,7 +58,7 @@
             </telerik:RadNavigationView.PaneFooter>
             -->
         </telerik:RadNavigationView>
-            
+
         <telerik:RadNotifyIcon x:Name="icon"
                                TrayIconSource="/Images/icons8-data-soft-fill-70.ico"
                                TooltipContent="Firewall Status Display"

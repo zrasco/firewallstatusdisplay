@@ -1,4 +1,6 @@
 ﻿using Firewall_Status_Display.ViewModels;
+using Firewall_Status_Display.Views;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +13,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Telerik.Windows.Controls;
+using Telerik.Windows.Data;
+using IServiceProvider = System.IServiceProvider;
 
 namespace Firewall_Status_Display
 {
@@ -19,9 +24,27 @@ namespace Firewall_Status_Display
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly IServiceProvider _services;
+        public MainWindow(IServiceProvider services)
         {
+            var res = App.Current.Resources;
+
             InitializeComponent();
+
+            // Initialize the ViewModel dictionary
+            var vm = (MainViewModel)DataContext;
+
+            _services = services;
+
+            vm.ViewModelDict["Status"] = services.GetRequiredService<StatusView>();
+            vm.ViewModelDict["Syslog"] = services.GetRequiredService<SyslogView>();
+            vm.ViewModelDict["Firewall log"] = services.GetRequiredService<FirewallView>();
+            vm.ViewModelDict["Settings"] = services.GetRequiredService<SettingsView>();
+
+            // Set current view
+            navigationView.SelectedIndex = 0;
+            //vm.CurrentView = vm.ViewModelDict["Status"];
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -34,12 +57,14 @@ namespace Firewall_Status_Display
                 Application.Current.Properties["CloseNotificationShown"] = true;
 
                 // Show the systray notification once per run
+                
                 icon.BalloonIconSource = icon.TrayIconSource;
                 icon.BalloonTitle = "Firewall Status Display";
                 icon.PopupShowDuration = 5000;
                 icon.BalloonText = "This program will continue to run in the background. You can close it by right-clicking the tray icon.";
 
                 icon.ShowBalloonTip();
+                
             }
 
 
@@ -61,6 +86,20 @@ namespace Firewall_Status_Display
         private void ctxMenuExit_Click(object sender, Telerik.Windows.RadRoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private void navigationView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var view = (RadNavigationView)sender;
+            var selectedItem = (RadNavigationViewItem)view.SelectedValue;
+            var selectedItemText = selectedItem.Content.ToString();
+
+            // Get the VM
+            var vm = (MainViewModel)DataContext;
+
+            // Change the current navigation content pane
+            vm.CurrentView = vm.ViewModelDict[selectedItemText];
+
         }
     }
 }
