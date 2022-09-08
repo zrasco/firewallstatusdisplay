@@ -21,8 +21,6 @@ namespace Firewall_Status_Display
         public static IHost AppHost { get; private set; }
         public App()
         {
-            // Set theme here
-            StyleManager.ApplicationTheme = new Office2016Theme();
 
             //this.InitializeComponent();
             AppHost = Host.CreateDefaultBuilder()

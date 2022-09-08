@@ -3,21 +3,45 @@
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
                 xmlns:local="clr-namespace:Firewall_Status_Display"
-                xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"      
-                Title="Firewall Status Display" Height="350" Width="525"
+                xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"
+                xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                Title="Firewall Status Display" MinHeight="500" MinWidth="750"
                 Loaded="Window_Loaded"
                 Closing="Window_Closing"
                 DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}">
-
+    <Window.Resources>
+        <sys:String x:Key="IconGuid">a6d76166-f2ac-4c9e-b86a-9f1825d08f6c</sys:String>
+    </Window.Resources>
     <Grid>
         <!-- Icon source: https://icons8.com/icon/hkmFpevNcYPV/data -->
-        <!--
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        -->
-        <telerik:RadNavigationView x:Name="navigationView" CompactModeThresholdWidth="200" ExpandedModeThresholdWidth="400" SelectionChanged="navigationView_SelectionChanged">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0">
+                <Image.Source>
+                    <BitmapImage UriSource="/Images/zebslab-logo2.png"/>
+                </Image.Source>
+            </Image>
+            <Grid Grid.Column="1">
+                <TextBlock Margin="10" Text="Firewall Status Display" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Grid>
+
+        </Grid>
+        <telerik:RadNavigationView Grid.Row="1"
+                                   x:Name="navigationView"
+                                   CompactModeThresholdWidth="200"
+                                   ExpandedPaneWidth="200"
+                                   ExpandedModeThresholdWidth="400"
+                                   SelectionChanged="navigationView_SelectionChanged"
+                                   PaneToggleButtonVisibility="Collapsed"
+                                   PaneHeaderHeight="0">
             <!-- Menu items -->
             <telerik:RadNavigationView.Items>
                 <telerik:RadNavigationViewItem Content="Status">
@@ -63,7 +87,8 @@
         <telerik:RadNotifyIcon x:Name="icon"
                                TrayIconSource="/Images/icons8-data-soft-fill-70.ico"
                                TooltipContent="Firewall Status Display"
-                               TrayIconMouseDoubleClick="icon_TrayIconMouseDoubleClick">
+                               TrayIconMouseDoubleClick="icon_TrayIconMouseDoubleClick"
+                               GuidItem="{Binding IconGuid}">
             <telerik:RadNotifyIcon.TrayContextMenu>
                 <telerik:RadContextMenu>
                     <telerik:RadMenuItem x:Name="ctxMenuShow" FontWeight="Bold" Header="Show" Click="ctxMenuShow_Click"/>

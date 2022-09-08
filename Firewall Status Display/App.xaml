@@ -11,6 +11,12 @@
                     <!-- Keys must be put in here instead of in the dictionary directly *eyeroll -->
                     <vm:ViewModelLocator x:Key="Locator" />
                 </ResourceDictionary>
+                <!-- Theme here. Might need to set up more depending on need. Go to Depedencies->Assemblies->Telerik.Windows.Themes.(Name), right-click and goto object browser -->
+                <ResourceDictionary Source="/Telerik.Windows.Themes.Office2016;component/Themes/System.Windows.xaml"/>
+                <ResourceDictionary Source="/Telerik.Windows.Themes.Office2016;component/Themes/Telerik.Windows.Controls.xaml"/>
+                <ResourceDictionary Source="/Telerik.Windows.Themes.Office2016;component/Themes/Telerik.Windows.Controls.Input.xaml"/>
+                <ResourceDictionary Source="/Telerik.Windows.Themes.Office2016;component/Themes/Telerik.Windows.Controls.GridView.xaml"/>
+                <ResourceDictionary Source="/Telerik.Windows.Themes.Office2016;component/Themes/Telerik.Windows.Controls.Navigation.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

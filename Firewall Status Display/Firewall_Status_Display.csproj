@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>Firewall_Status_Display</RootNamespace>
     <EnableDefaultItems>False</EnableDefaultItems>
+    <ApplicationIcon>Images\icons8-data-soft-fill-70.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -60,7 +61,17 @@
 </ItemGroup>
   
   <ItemGroup>
-    <Content Include="icons8-data-soft-fill-70.ico" />
+    <Resource Include="Images\zebslab-logo2.png" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Resource Include="Images\zebslab-logo1.png" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="Telerik.Windows.Themes.Office2016">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Progress\Telerik UI for WPF R2 2022\Binaries.NoXaml\WPF60\Telerik.Windows.Themes.Office2016.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <ItemGroup>

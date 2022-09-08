@@ -28,12 +28,23 @@ namespace Firewall_Status_Display.ViewModels
         }
 
         private object currentView;
-        
 
         public object CurrentView
         {
             get { return currentView; }
             set { currentView = value; RaisePropertyChanged(); }
+        }
+
+        public Guid IconGuid
+        {
+            get { 
+#if DEBUG
+                var guid = "a6d76166-f2ac-4c9e-b86a-9f1825d08f6c";
+#else
+                var guid = "a0cee5f3-0d1b-4cea-9692-04d4d05a047c";
+#endif
+                return new Guid(guid);
+            }
         }
     }
 }

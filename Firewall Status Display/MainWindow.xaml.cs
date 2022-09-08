@@ -30,8 +30,6 @@ namespace Firewall_Status_Display
         public MainWindow(IServiceProvider services,
                             ISyslogReciever syslogReciever)
         {
-            var res = App.Current.Resources;
-
             InitializeComponent();
 
             // Initialize the ViewModel dictionary
@@ -89,6 +87,7 @@ namespace Firewall_Status_Display
 
         private void ctxMenuExit_Click(object sender, Telerik.Windows.RadRoutedEventArgs e)
         {
+            Application.Current.Properties["CloseNotificationShown"] = true;
             Application.Current.Shutdown();
         }
 
@@ -115,7 +114,7 @@ namespace Firewall_Status_Display
 
         private void _syslogReciever_DataRecievedEvent(object sender, RecievedDataArgs args)
         {
-            MessageBox.Show(System.Text.Encoding.UTF8.GetString(args.RecievedBytes, 0, args.RecievedBytes.Length));
+            //MessageBox.Show(System.Text.Encoding.UTF8.GetString(args.RecievedBytes, 0, args.RecievedBytes.Length));
         }
     }
 }
