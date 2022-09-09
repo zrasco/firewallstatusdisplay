@@ -2,6 +2,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Firewall_Status_Display"
+    xmlns:v="clr-namespace:Firewall_Status_Display.Views"
     xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"
     xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation">
     <Application.Resources>
@@ -9,7 +10,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <!-- Keys must be put in here instead of in the dictionary directly *eyeroll -->
-                    <vm:ViewModelLocator x:Key="Locator" />
+                    <vm:ViewModelLocator x:Key="ViewModelLocator"/>
+                    <v:ViewLocator x:Key="ViewLocator"/>
                 </ResourceDictionary>
                 <!-- Theme here. Might need to set up more depending on need. Go to Depedencies->Assemblies->Telerik.Windows.Themes.(Name), right-click and goto object browser -->
                 <ResourceDictionary Source="/Telerik.Windows.Themes.Office2016;component/Themes/System.Windows.xaml"/>

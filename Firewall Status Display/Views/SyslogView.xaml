@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:Background="White"
-             DataContext="{Binding Source={StaticResource Locator}, Path=SyslogViewModel}">
+             DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=SyslogViewModel}">
     <Grid>
         <TextBlock Text="{Binding Content}"/>
     </Grid>

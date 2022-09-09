@@ -6,9 +6,8 @@
                 xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"
                 xmlns:sys="clr-namespace:System;assembly=mscorlib"
                 Title="Firewall Status Display" MinHeight="500" MinWidth="750"
-                Loaded="Window_Loaded"
                 Closing="Window_Closing"
-                DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}">
+                DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=MainViewModel}">
     <Window.Resources>
         <sys:String x:Key="IconGuid">a6d76166-f2ac-4c9e-b86a-9f1825d08f6c</sys:String>
     </Window.Resources>
@@ -39,27 +38,26 @@
                                    CompactModeThresholdWidth="200"
                                    ExpandedPaneWidth="200"
                                    ExpandedModeThresholdWidth="400"
-                                   SelectionChanged="navigationView_SelectionChanged"
                                    PaneToggleButtonVisibility="Collapsed"
                                    PaneHeaderHeight="0">
             <!-- Menu items -->
             <telerik:RadNavigationView.Items>
-                <telerik:RadNavigationViewItem Content="Status">
+                <telerik:RadNavigationViewItem Content="Status" Command="{Binding NavCommand}" CommandParameter="{Binding Source={StaticResource ViewLocator}, Path=StatusView}">
                     <telerik:RadNavigationViewItem.Icon>
                         <telerik:RadGlyph Glyph="&#xe137;" FontSize="16"/>
                     </telerik:RadNavigationViewItem.Icon>
                 </telerik:RadNavigationViewItem>
-                <telerik:RadNavigationViewItem Content="Syslog">
+                <telerik:RadNavigationViewItem Content="Syslog" Command="{Binding NavCommand}" CommandParameter="{Binding Source={StaticResource ViewLocator}, Path=SyslogView}">
                     <telerik:RadNavigationViewItem.Icon>
                         <telerik:RadGlyph Glyph="&#xe908;" FontSize="16"/>
                     </telerik:RadNavigationViewItem.Icon>
                 </telerik:RadNavigationViewItem>
-                <telerik:RadNavigationViewItem Content="Firewall log">
+                <telerik:RadNavigationViewItem Content="Firewall log" Command="{Binding NavCommand}" CommandParameter="{Binding Source={StaticResource ViewLocator}, Path=FirewallView}">
                     <telerik:RadNavigationViewItem.Icon>
                         <telerik:RadGlyph Glyph="&#xe701;" FontSize="16"/>
                     </telerik:RadNavigationViewItem.Icon>
                 </telerik:RadNavigationViewItem>
-                <telerik:RadNavigationViewItem Content="Settings">
+                <telerik:RadNavigationViewItem Content="Settings" Command="{Binding NavCommand}" CommandParameter="{Binding Source={StaticResource ViewLocator}, Path=SettingsView}">
                     <telerik:RadNavigationViewItem.Icon>
                         <telerik:RadGlyph Glyph="&#xe13a;" FontSize="20" />
                     </telerik:RadNavigationViewItem.Icon>

@@ -26,32 +26,24 @@ namespace Firewall_Status_Display
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _services;
-        private readonly ISyslogReciever _syslogReciever;
-        public MainWindow(IServiceProvider services,
-                            ISyslogReciever syslogReciever)
+        public MainWindow(IServiceProvider services) : this()
         {
-            InitializeComponent();
-
-            // Initialize the ViewModel dictionary
-            var vm = (MainViewModel)DataContext;
-
             _services = services;
 
-            vm.ViewModelDict["Status"] = services.GetRequiredService<StatusView>();
-            vm.ViewModelDict["Syslog"] = services.GetRequiredService<SyslogView>();
-            vm.ViewModelDict["Firewall log"] = services.GetRequiredService<FirewallView>();
-            vm.ViewModelDict["Settings"] = services.GetRequiredService<SettingsView>();
-
             // Set current view
-            navigationView.SelectedIndex = 0;
+            var vm = (MainViewModel)DataContext;
+            navigationView.SelectedItem = navigationView.Items[0];
+            vm.NavCommand.Execute(_services.GetRequiredService<StatusView>());
+        }
 
-            // Set up UDP listener for when window loads
-            _syslogReciever = syslogReciever;
-
+        public MainWindow()
+        {
+            InitializeComponent();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+#if !DEBUG
             // Hide the window instead of closing it
             this.Hide();
 
@@ -72,6 +64,7 @@ namespace Firewall_Status_Display
 
             // Cancel the close event so we don't exit the program
             e.Cancel = true;
+#endif
         }
 
         private void icon_TrayIconMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -87,34 +80,10 @@ namespace Firewall_Status_Display
 
         private void ctxMenuExit_Click(object sender, Telerik.Windows.RadRoutedEventArgs e)
         {
+            this.icon.Dispose();
+            this.icon = null;
             Application.Current.Properties["CloseNotificationShown"] = true;
             Application.Current.Shutdown();
-        }
-
-        private void navigationView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var view = (RadNavigationView)sender;
-            var selectedItem = (RadNavigationViewItem)view.SelectedValue;
-            var selectedItemText = selectedItem.Content.ToString();
-
-            // Get the VM
-            var vm = (MainViewModel)DataContext;
-
-            // Change the current navigation content pane
-            vm.CurrentView = vm.ViewModelDict[selectedItemText];
-
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            _syslogReciever.StartAsync();
-
-            _syslogReciever.DataRecievedEvent += _syslogReciever_DataRecievedEvent;
-        }
-
-        private void _syslogReciever_DataRecievedEvent(object sender, RecievedDataArgs args)
-        {
-            //MessageBox.Show(System.Text.Encoding.UTF8.GetString(args.RecievedBytes, 0, args.RecievedBytes.Length));
         }
     }
 }
