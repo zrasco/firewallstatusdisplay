@@ -1,5 +1,7 @@
-﻿using Firewall_Status_Display.Services;
+﻿using Firewall_Status_Display.Data.Contexts;
+using Firewall_Status_Display.Services;
 using Firewall_Status_Display.Views;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,6 +23,8 @@ namespace Firewall_Status_Display.ViewModels
     {
         public string Contents { get; set; }
         private readonly ISyslogReciever _syslogReciever;
+        private readonly IServiceProvider _services;
+        private readonly IDataRepoService _dataRepoService;
 
         public MainViewModel()
         {
@@ -29,18 +33,32 @@ namespace Firewall_Status_Display.ViewModels
             // Set up commands not requiring dependencies
             NavCommand = new DelegateCommand(OnNavBadgeCommandExecute);
         }
-        public MainViewModel(ISyslogReciever syslogReciever) : this()
+        public MainViewModel(ISyslogReciever syslogReciever,
+                                IServiceProvider services,
+                                IDataRepoService dataRepoService) : this()
         {
             // Start syslog reciever
             _syslogReciever = syslogReciever;
 
-            _syslogReciever.StartAsync();
             _syslogReciever.DataRecievedEvent += SyslogDataRecieved;
+            _syslogReciever.StartAsync();
+
+            // Inject other dependencies
+            _services = services;
+            _dataRepoService = dataRepoService;
+
         }
 
         private void SyslogDataRecieved(object sender, RecievedDataArgs args)
         {
-            throw new NotImplementedException();
+            var vm = _services.GetRequiredService<SyslogViewModel>();
+            var rawData = Encoding.Default.GetString(args.RecievedBytes);
+
+            // Add to log output
+            vm.AppendLogCommand.Execute(rawData);
+
+            // Add to db
+            _dataRepoService.AddFirewallEntry(rawData);            
         }
 
         private object currentView;

@@ -43,7 +43,7 @@ namespace Firewall_Status_Display
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-#if !DEBUG
+#if DEBUG
             // Hide the window instead of closing it
             this.Hide();
 

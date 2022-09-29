@@ -1,12 +1,15 @@
-﻿using Firewall_Status_Display.Services;
+﻿using Firewall_Status_Display.Data.Contexts;
+using Firewall_Status_Display.Services;
 using Firewall_Status_Display.ViewModels;
 using Firewall_Status_Display.Views;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using Telerik.Windows.Controls;
@@ -22,8 +25,9 @@ namespace Firewall_Status_Display
         public App()
         {
 
-            //this.InitializeComponent();
-            AppHost = Host.CreateDefaultBuilder()
+            var builder = Host.CreateDefaultBuilder();
+
+            AppHost = builder
                 .ConfigureServices((hostContext, services) =>
                 {
                     // Windows & controls
@@ -40,8 +44,13 @@ namespace Firewall_Status_Display
                     services.AddSingleton<FirewallViewModel>();
                     services.AddSingleton<SettingsViewModel>();
 
+                    // DB & repo
+                    services.AddDbContext<FirewallDataContext>();
+                    services.AddHttpClient<IDataRepoService, DataRepoService>();
+
                     // Other services
                     services.AddSingleton<ISyslogReciever, SyslogReciever>();
+
                 })
                 .Build();
         }
@@ -62,6 +71,14 @@ namespace Firewall_Status_Display
             await AppHost.StopAsync();
 
             base.OnExit(e);
+        }
+
+        private static void BuildConfig(IConfigurationBuilder builder)
+        {
+            builder.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                //.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+                .AddEnvironmentVariables();
         }
     }
 }

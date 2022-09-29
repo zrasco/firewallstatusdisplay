@@ -1,0 +1,30 @@
+﻿9-28-22
+-------
+Added appsettings.json and configuration capability (1hr)
+	- Set up IConfiguration builder
+	- Added appsettings.json file
+	- Populated appsettings.json with the default SQL connection string
+Set up database and studied/integrated IPTables log fields (3hrs)
+	- Installed EntityFrameworkCore NuGet package
+	- Created Data folder and Data/Contexts Data/Models subfolders
+	- Gathered sample data from iptables and populated in data model as comments
+	- Created entity class and assigned database table fields
+	- Got list of ISO 3166-1 3-digit country codes
+	- Added src/dest country code fields (for geolocation later)
+	- Installed Microsoft.EntityFrameworkCore.Tools NuGet package
+	- Set up DBContext for database access
+	- Created data repository interface and concrete implementation w/parser logic
+Implementing beginning stages of Geolocation
+	- Began work on geolocation using the free ip-api.com tool
+	- Set up DbContext SavingChanges event to grab 100 Geolocation IP addresses at a time
+	- Created scoped HttpContext handler for efficient IP address bulk retrieval
+	- Added http requests to ip-api.com to retrieve Geolocation information
+	- Added strongly-typed classes for working with ip-api.com
+	- TODO: Added rate-limiting logic of 15 batch requests per minute (effectively 1500 IPs per minute)
+Re-pivot of Geolocation strategy
+	- Decided the rate limits may be insufficient for large amounts of iptables log traffic and will complicate implementation
+	- Found monthly-updated geolocation database at: https://db-ip.com/db/download/ip-to-city-lite
+	- Database is in CSV format so added CsvHelper NuGet module
+	- TODO: Wrote import tool to convert the CSV into a database
+	- TODO: Added IP geolocation table
+	- TODO: Set index for last IP column

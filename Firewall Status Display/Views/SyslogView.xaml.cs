@@ -24,5 +24,11 @@ namespace Firewall_Status_Display.Views
         {
             InitializeComponent();
         }
+
+        private void txtBoxSyslog_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Automatically scroll to end when log is appended
+            //txtBoxSyslog.ScrollToEnd();
+        }
     }
 }
