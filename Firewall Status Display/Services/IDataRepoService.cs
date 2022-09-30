@@ -6,8 +6,8 @@ namespace Firewall_Status_Display.Services
 {
     public interface IDataRepoService
     {
+        Task<int> CommitChangesAsync();
         Task<bool> AddFirewallEntryAsync(string rawLogLine);
-        Task<bool> ImportGeolocationCSV(string pathName);
         GeolocationEntry GetByIP(string ipAddr);
     }
 }

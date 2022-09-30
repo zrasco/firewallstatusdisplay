@@ -42,3 +42,10 @@ Geolocation
 	- Tweaked asynchronous handling and worked out bugs with higher volume traffic
 	- Ran into concurrent access issue with geolocation & firewall entries which has delayed progress
 		- https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/#avoiding-dbcontext-threading-issues
+
+9-30-22
+-------
+Geolocation
+	- Found acceptable solution to database concurrency issue
+		- Separated geolocation and firewall entries into two seperate DbContexts
+		- Created background thread to commit firewall entries once per minute instead of each time they come in

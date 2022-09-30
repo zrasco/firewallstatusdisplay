@@ -52,6 +52,7 @@
     <SubType>Code</SubType>
   </Compile>
   <Compile Include="Data\Contexts\FirewallDataContext.cs" />
+  <Compile Include="Data\Contexts\GeolocationDataContext.cs" />
   <Compile Include="Data\Models\FirewallEntry.cs" />
   <Compile Include="Data\Models\GeolocationEntry.cs" />
   <Compile Include="Data\ObjectDataReader.cs" />

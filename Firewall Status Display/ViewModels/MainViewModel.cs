@@ -6,9 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,7 +42,6 @@ namespace Firewall_Status_Display.ViewModels
         {
             // Start syslog reciever
             _syslogReciever = syslogReciever;
-
             _syslogReciever.DataRecievedEvent += SyslogDataRecieved;
             
             // Start in background
@@ -49,6 +50,13 @@ namespace Firewall_Status_Display.ViewModels
             // Inject other dependencies
             _services = services;
             _dataRepoService = dataRepoService;
+
+            // Run our commit every minute in background
+            Task.Run(async () =>
+            {
+                await Task.Delay(60000);
+                await _dataRepoService.CommitChangesAsync();
+            });
 
             //_dataRepoService.ImportGeolocationCSV(@"D:\Users\zrasco\Downloads\dbip-city-lite-2022-09.csv\dbip-city-lite-2022-09.csv");
 
@@ -61,8 +69,9 @@ namespace Firewall_Status_Display.ViewModels
 
             // Add to log output
             vm.AppendLogCommand.Execute(rawData);
+            Debug.Print($"Syslog recieved event for thread ID {Thread.CurrentThread.ManagedThreadId}");
 
-            // Add to db using dispatcher (avoids concurrency issues)
+
             await _dataRepoService.AddFirewallEntryAsync(rawData);
             //await _dataRepoService.AddFirewallEntryAsync(rawData);
                      

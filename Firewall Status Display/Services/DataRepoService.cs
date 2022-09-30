@@ -85,14 +85,14 @@ namespace Firewall_Status_Display.Services
         // Must be 50 or less for ip-api
         private const int ENTRIES_BEFORE_GEOLOCATION = 4;
 
-        private readonly FirewallDataContext _context;
+        private readonly FirewallDataContext _fwContext;
         private readonly HttpClient _httpClient;
         private readonly IGeolocationCache _geolocationCache;
         public DataRepoService(FirewallDataContext context,
                                 HttpClient httpClient,
                                 IGeolocationCache geolocationCache)
         {
-            _context = context;
+            _fwContext = context;
             _httpClient = httpClient;
 
             // Make sure DB is created
@@ -102,96 +102,17 @@ namespace Firewall_Status_Display.Services
             _geolocationCache = geolocationCache;
         }
 
-        public async Task<bool> ImportGeolocationCSV(string pathName)
+        public async Task<int> CommitChangesAsync()
         {
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            int commits = _fwContext.ChangeTracker.Entries().Count();
+            
+            if (commits > 0)
             {
-                HasHeaderRecord = false,
-
-            };
-            using (var reader = new StreamReader(pathName))
-            {
-                using (var csv = new CsvReader(reader, config))
-                {
-                    // Skip IPv6
-                    var records = csv.GetRecords<GeolocationCSVEntry>().TakeWhile(p => p.BeginningIPStr != "::");
-
-                    // Delete all existing rows in the table
-                    _context.Database.ExecuteSqlRaw($"TRUNCATE TABLE [{nameof(_context.GeolocationEntries)}]");
-
-                    var recordList = records.ToList();
-
-                    _context.GeolocationEntries.AddRange(recordList.Select(x => new GeolocationEntry()
-                    {
-                        BeginningIP = ToInt(x.BeginningIPStr),
-                        EndingIP = ToInt(x.EndingIPStr),
-                        City = x.City,
-                        EntryType = x.EntryType,
-                        Iso2DigitCountryCode = x.Iso2DigitCountryCode,
-                        Region = x.Region,
-                        Latitude = x.Latitude,
-                        Longitude = x.Longitude
-                    }));
-
-                    /*
-                    foreach (var record in records)
-                    {
-                        // Skip the IPv6 addresses for now
-                        if (record.BeginningIPStr == "::")
-                            break;
-                        _context.GeolocationEntries.Add(new GeolocationEntry()
-                        {
-                            BeginningIP = ToInt(record.BeginningIPStr),
-                            EndingIP = ToInt(record.EndingIPStr),
-                            City = record.City,
-                            EntryType = record.EntryType,
-                            Iso2DigitCountryCode = record.Iso2DigitCountryCode,
-                            Region = record.Region,
-                            Latitude = record.Latitude,
-                            Longitude = record.Longitude
-                        });
-                    }
-                    */
-
-                    
-                }
+                Debug.Print($"Committing {commits} firewall entries to database");
+                await _fwContext.SaveChangesAsync();
+                Debug.Print($"Done committing");
             }
-            // Attempt bulk copy
-            //entities - entity collection EntityFramework
-            /*
-            using (SqlConnection connection = new SqlConnection(_context.Database.GetConnectionString()))
-            {
-                using (var table = _context.GeolocationEntries.ToDataTable<GeolocationEntry>())
-                {
-                    using (SqlBulkCopy bcp = new SqlBulkCopy(connection))
-                    {
-                        connection.Open();
-
-                        bcp.DestinationTableName = "[GeolocationEntries]";
-
-                        bcp.ColumnMappings.Add("Id", "Id");
-                        bcp.ColumnMappings.Add("BeginningIP", "BeginningIP");
-                        bcp.ColumnMappings.Add("EndingIP", "EndingIP");
-                        bcp.ColumnMappings.Add("EntryType", "EntryType");
-                        bcp.ColumnMappings.Add("Iso2DigitCountryCode", "Iso2DigitCountryCode");
-                        bcp.ColumnMappings.Add("City", "City");
-                        bcp.ColumnMappings.Add("Region", "Region");
-                        bcp.ColumnMappings.Add("Latitude", "Latitude");
-                        bcp.ColumnMappings.Add("Longitude", "Longitude");
-
-                        bcp.WriteToServer(table);
-                    }
-                }    
-                
-            }
-            */
-
-
-            // Normal way
-            _context.SaveChanges();
-
-
-            return true;
+            return commits;
         }
 
         public async Task<bool> AddFirewallEntryAsync(string rawLogLine)
@@ -202,25 +123,8 @@ namespace Firewall_Status_Display.Services
                 var fwEntry = ParseIntoFirewallEntry(rawLogLine);
                 if (fwEntry != null)
                 {
-                    _context.FirewallEntries.Add(fwEntry);
-                    Debug.Print($"Save changes async started for ID {Thread.CurrentThread.ManagedThreadId}");
-                    await _context.SaveChangesAsync();
-                    Debug.Print($"Save changes async ended for ID {Thread.CurrentThread.ManagedThreadId}");
-                }    
-
-                /*
-                if (fwEntry != null)
-                {
-                    _context.FirewallEntries.Add(fwEntry);
-
-                    if (_context.ChangeTracker.Entries().Count() >= ENTRIES_BEFORE_GEOLOCATION)
-                    {
-                        await _context.SaveChangesAsync();
-                    }
+                    _fwContext.FirewallEntries.Add(fwEntry);
                 }
-                */
-
-                
             }
             catch
             {

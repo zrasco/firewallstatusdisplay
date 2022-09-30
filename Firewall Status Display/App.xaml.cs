@@ -47,6 +47,7 @@ namespace Firewall_Status_Display
 
                     // DB & repo
                     services.AddDbContext<FirewallDataContext>();
+                    services.AddDbContext<GeolocationDataContext>();
                     services.AddSingleton<IGeolocationCache, GeolocationCache>();
                     services.AddHttpClient<IDataRepoService, DataRepoService>();
                     
