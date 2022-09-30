@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="28.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9">
@@ -52,12 +53,16 @@
   </Compile>
   <Compile Include="Data\Contexts\FirewallDataContext.cs" />
   <Compile Include="Data\Models\FirewallEntry.cs" />
+  <Compile Include="Data\Models\GeolocationEntry.cs" />
+  <Compile Include="Data\ObjectDataReader.cs" />
   <Compile Include="MainWindow.xaml.cs">
     <DependentUpon>MainWindow.xaml</DependentUpon>
     <SubType>Code</SubType>
   </Compile>
   <Compile Include="Services\DataRepoService.cs" />
+  <Compile Include="Services\GeolocationCache.cs" />
   <Compile Include="Services\IDataRepoService.cs" />
+  <Compile Include="Services\IGeolocationCache.cs" />
   <Compile Include="Services\ISyslogReciever.cs" />
   <Compile Include="Services\SyslogReciever.cs" />
   <Compile Include="ViewModels\FirewallViewModel.cs" />

@@ -12,6 +12,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Navigation;
 using Telerik.Windows.Controls;
 
 namespace Firewall_Status_Display
@@ -46,7 +47,9 @@ namespace Firewall_Status_Display
 
                     // DB & repo
                     services.AddDbContext<FirewallDataContext>();
+                    services.AddSingleton<IGeolocationCache, GeolocationCache>();
                     services.AddHttpClient<IDataRepoService, DataRepoService>();
+                    
 
                     // Other services
                     services.AddSingleton<ISyslogReciever, SyslogReciever>();

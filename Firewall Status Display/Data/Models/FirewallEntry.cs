@@ -36,9 +36,13 @@ namespace Firewall_Status_Display.Data.Models
         public byte Res { get; set; }
         public byte Flags { get; set; }
 
-        // ISO country codes
-        public string SrcCountryCode { get; set; }
-        public string DstCountryCode { get; set; }
+        // Geolocation info
+        public string SrcCity { get; set; }
+        public string SrcRegion { get; set; }
+        public string SrcCountryCode { get; set; }        
+        public string DestCity { get; set; }
+        public string DestRegion { get; set; }
+        public string DestCountryCode { get; set; }
     }
 }
 /*

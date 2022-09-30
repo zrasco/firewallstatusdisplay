@@ -65,7 +65,7 @@ namespace Firewall_Status_Display.Services
                 var res = await _listener.ReceiveAsync(cancellationToken);
 
                 // Raise event
-                RaiseDataRecieved(new RecievedDataArgs(res.RemoteEndPoint.Address, res.RemoteEndPoint.Port, res.Buffer));
+                await RaiseDataRecievedAsync(new RecievedDataArgs(res.RemoteEndPoint.Address, res.RemoteEndPoint.Port, res.Buffer));
             }
         }
 
@@ -76,11 +76,10 @@ namespace Firewall_Status_Display.Services
             return null;
         }
 
-        private void RaiseDataRecieved(RecievedDataArgs args)
+        private async Task RaiseDataRecievedAsync(RecievedDataArgs args)
         {
-            if (DataRecievedEvent != null)
-                DataRecievedEvent(this, args);
-
+            DataRecievedEvent?.Invoke(this, args);
+            //Application.Current.Dispatcher.Invoke(() => DataRecievedEvent?.Invoke(this, args));
         }
     }
 }

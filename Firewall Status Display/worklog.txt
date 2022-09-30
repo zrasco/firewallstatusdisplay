@@ -1,10 +1,10 @@
 ﻿9-28-22
 -------
-Added appsettings.json and configuration capability (1hr)
+Added appsettings.json and configuration capability
 	- Set up IConfiguration builder
 	- Added appsettings.json file
 	- Populated appsettings.json with the default SQL connection string
-Set up database and studied/integrated IPTables log fields (3hrs)
+Set up database and studied/integrated IPTables log fields
 	- Installed EntityFrameworkCore NuGet package
 	- Created Data folder and Data/Contexts Data/Models subfolders
 	- Gathered sample data from iptables and populated in data model as comments
@@ -25,6 +25,20 @@ Re-pivot of Geolocation strategy
 	- Decided the rate limits may be insufficient for large amounts of iptables log traffic and will complicate implementation
 	- Found monthly-updated geolocation database at: https://db-ip.com/db/download/ip-to-city-lite
 	- Database is in CSV format so added CsvHelper NuGet module
-	- TODO: Wrote import tool to convert the CSV into a database
-	- TODO: Added IP geolocation table
-	- TODO: Set index for last IP column
+	- Wrote import tool to convert the CSV into a database. TODO: Speed this up as it takes about 8min over a 1GB link
+	- Added IP geolocation table
+	- Added column indexes to beginning/end IP. Still too slow but this might help: http://mysql.rjweb.org/doc.php/ipranges
+	- Experimenting with column data types/indexes to speed up searching
+
+9-29-22
+-------
+Geolocation
+	- Lookup performance isn't the best but acceptable for now. Will refactor later so I can move onto other parts of the app
+	- Added check for private IPs
+	- Added geolocation cache with variable entries (10,000 to start) to avoid redundant DB lookups
+	- Added cache statistic functions to cache interface
+	- Worked more on parser
+	- Added capability of writing firewall entries to database
+	- Tweaked asynchronous handling and worked out bugs with higher volume traffic
+	- Ran into concurrent access issue with geolocation & firewall entries which has delayed progress
+		- https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/#avoiding-dbcontext-threading-issues

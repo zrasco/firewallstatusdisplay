@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Telerik.Windows.Controls;
 using IServiceProvider = System.IServiceProvider;
 
@@ -41,15 +42,19 @@ namespace Firewall_Status_Display.ViewModels
             _syslogReciever = syslogReciever;
 
             _syslogReciever.DataRecievedEvent += SyslogDataRecieved;
-            _syslogReciever.StartAsync();
+            
+            // Start in background
+            Task.Run(() => _syslogReciever.StartAsync());
 
             // Inject other dependencies
             _services = services;
             _dataRepoService = dataRepoService;
 
+            //_dataRepoService.ImportGeolocationCSV(@"D:\Users\zrasco\Downloads\dbip-city-lite-2022-09.csv\dbip-city-lite-2022-09.csv");
+
         }
 
-        private void SyslogDataRecieved(object sender, RecievedDataArgs args)
+        private async void SyslogDataRecieved(object sender, RecievedDataArgs args)
         {
             var vm = _services.GetRequiredService<SyslogViewModel>();
             var rawData = Encoding.Default.GetString(args.RecievedBytes);
@@ -57,8 +62,10 @@ namespace Firewall_Status_Display.ViewModels
             // Add to log output
             vm.AppendLogCommand.Execute(rawData);
 
-            // Add to db
-            _dataRepoService.AddFirewallEntry(rawData);            
+            // Add to db using dispatcher (avoids concurrency issues)
+            await _dataRepoService.AddFirewallEntryAsync(rawData);
+            //await _dataRepoService.AddFirewallEntryAsync(rawData);
+                     
         }
 
         private object currentView;

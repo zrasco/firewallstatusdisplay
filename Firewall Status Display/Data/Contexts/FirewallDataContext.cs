@@ -28,5 +28,6 @@ namespace Firewall_Status_Display.Data.Contexts
         }
         
         public DbSet<FirewallEntry> FirewallEntries { get; set; }
+        public DbSet<GeolocationEntry> GeolocationEntries { get; set; }
     }
 }
