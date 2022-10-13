@@ -28,6 +28,7 @@ namespace Firewall_Status_Display.ViewModels
         private readonly ISyslogReciever _syslogReciever;
         private readonly IServiceProvider _services;
         private readonly IDataRepoService _dataRepoService;
+        private readonly CancellationTokenSource _commitCancellationTokenSource;
 
         public MainViewModel()
         {
@@ -35,7 +36,16 @@ namespace Firewall_Status_Display.ViewModels
 
             // Set up commands not requiring dependencies
             NavCommand = new DelegateCommand(OnNavBadgeCommandExecute);
+            CancelDBLoopCommand = new DelegateCommand(OnCancelDBLoopCommandExecute);
+            SetStatusTextCommand = new DelegateCommand(OnSetStatusTextCommandExecute);
+            SetStatusColorCommand = new DelegateCommand(OnSetStatusColorCommandExecute);
         }
+
+        private void OnCancelDBLoopCommandExecute(object obj)
+        {
+            _commitCancellationTokenSource.Cancel();
+        }
+
         public MainViewModel(ISyslogReciever syslogReciever,
                                 IServiceProvider services,
                                 IDataRepoService dataRepoService) : this()
@@ -51,28 +61,88 @@ namespace Firewall_Status_Display.ViewModels
             _services = services;
             _dataRepoService = dataRepoService;
 
+            // TODO: Add DelegateCommand when app is shut down
+            _commitCancellationTokenSource = new CancellationTokenSource();
             // Run our commit every minute in background
             Task.Run(async () =>
             {
-                await Task.Delay(60000);
-                await _dataRepoService.CommitChangesAsync();
-            });
+                bool exit = false;
 
-            //_dataRepoService.ImportGeolocationCSV(@"D:\Users\zrasco\Downloads\dbip-city-lite-2022-09.csv\dbip-city-lite-2022-09.csv");
+                // Keep trying this during outages etc
+                while (!exit)
+                {
+                    try
+                    {
+                        await Task.Delay(60000, _commitCancellationTokenSource.Token);
+                        await _dataRepoService.CommitChangesAsync();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        exit = true;
+                    }
+                }
+
+                // Done here
+                // Program is shutting down. Commit changes
+                Debug.WriteLine("Program is shutting down. Making last DB commit...");
+                await _dataRepoService.CommitChangesAsync();
+                _commitCancellationTokenSource.Dispose();
+
+
+            }, _commitCancellationTokenSource.Token);
 
         }
 
         private async void SyslogDataRecieved(object sender, RecievedDataArgs args)
         {
-            var vm = _services.GetRequiredService<SyslogViewModel>();
+            var syslogVM = _services.GetRequiredService<SyslogViewModel>();
+            var firewallVM = _services.GetRequiredService<FirewallViewModel>();
             var rawData = Encoding.Default.GetString(args.RecievedBytes);
 
             // Add to log output
-            vm.AppendLogCommand.Execute(rawData);
+            syslogVM.AppendLogCommand.Execute(rawData);
             Debug.Print($"Syslog recieved event for thread ID {Thread.CurrentThread.ManagedThreadId}");
 
+            // Add to database
+            var fwEntry = await _dataRepoService.AddFirewallEntryAsync(rawData);
 
-            await _dataRepoService.AddFirewallEntryAsync(rawData);
+            // Add to firewall view
+            if (fwEntry != null)
+            {
+                var rowEntry = new FirewallViewRowItem()
+                {
+                    MacAddr = fwEntry.MacAddr,
+                    IPDest = fwEntry.IPDest,
+                    IPSrc = fwEntry.IPSrc,
+                    In = fwEntry.In,
+                    Out = fwEntry.Out,
+                    PortDest = fwEntry.PortDest,
+                    PortSrc = fwEntry.PortSrc,
+                    Flags = fwEntry.Flags,
+                    Length = fwEntry.Length,
+                    PacketId = fwEntry.PacketId,
+                    Proto = fwEntry.Proto,
+                    RuleName = fwEntry.RuleName,
+                    Prec = fwEntry.Prec,
+                    Res = fwEntry.Res,
+                    SendingHost = fwEntry.SendingHost,
+                    TimeStamp = fwEntry.TimeStamp,
+                    TOS = fwEntry.TOS,
+                    TTL = fwEntry.TTL,
+                    Window = fwEntry.TTL,
+                    DestCity = fwEntry.DestCity,
+                    DestRegion = fwEntry.DestRegion,
+                    DestCountryCode = fwEntry.DestCountryCode,
+                    SrcCity = fwEntry.SrcCity,
+                    SrcRegion = fwEntry.SrcRegion,
+                    SrcCountryCode = fwEntry.SrcCountryCode
+                };
+
+                firewallVM.AddItemCommand.Execute(rowEntry);
+            }
+            
+
+
             //await _dataRepoService.AddFirewallEntryAsync(rawData);
                      
         }
@@ -118,6 +188,7 @@ namespace Firewall_Status_Display.ViewModels
 
         #region Commands
         public ICommand SetStatusTextCommand { get; set; }
+        public ICommand CancelDBLoopCommand { get; set; }
 
         private void OnSetStatusTextCommandExecute(object text)
         {

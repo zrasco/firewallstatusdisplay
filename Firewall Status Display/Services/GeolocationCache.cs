@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Firewall_Status_Display.Services
 {
@@ -41,6 +43,19 @@ namespace Firewall_Status_Display.Services
             // Set statistics
             _misses = 0;
             _hits = 0;
+
+            // Ensure table was created
+            RelationalDatabaseCreator databaseCreator =
+                (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();
+
+            try
+            {
+                databaseCreator.CreateTables();
+            }
+            catch { }
+
+            // Import!!
+            //_ = ImportGeolocationCSVAsync(@"D:\Users\zrasco\Downloads\dbip-city-lite-2022-09.csv\dbip-city-lite-2022-09.csv").Result;
         }
 
         public GeolocationEntry GetGeolocationInfo(string ipAddr)
@@ -105,7 +120,7 @@ namespace Firewall_Status_Display.Services
             //return _context.GeolocationEntries.Where(p => p.BeginningIP <= ip && p.BeginningIP >= ip-65535 && p.EndingIP >= ip).FirstOrDefault();
         }
 
-        public async Task<bool> ImportGeolocationCSV(string pathName)
+        public async Task<bool> ImportGeolocationCSVAsync(string pathName)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -120,7 +135,7 @@ namespace Firewall_Status_Display.Services
                     var records = csv.GetRecords<GeolocationCSVEntry>().TakeWhile(p => p.BeginningIPStr != "::");
 
                     // Delete all existing rows in the table
-                    _geoContext.Database.ExecuteSqlRaw($"TRUNCATE TABLE [{nameof(_geoContext.GeolocationEntries)}]");
+                    //await _geoContext.Database.ExecuteSqlRawAsync($"TRUNCATE TABLE [{nameof(_geoContext.GeolocationEntries)}]");
 
                     var recordList = records.ToList();
 

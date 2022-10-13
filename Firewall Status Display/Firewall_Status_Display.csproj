@@ -83,6 +83,7 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Images\zebslab-logo3.png" />
     <Content Include="worklog.txt" />
   </ItemGroup>
   

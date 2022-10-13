@@ -6,13 +6,6 @@ using System.Threading.Tasks;
 
 namespace Firewall_Status_Display.Data.Models
 {
-    public enum IPProto
-    {
-        TCP = 6,
-        UDP = 17,
-        ICMP = 1,
-        IGMP = 2
-    }
     public class FirewallEntry
     {
         public int Id { get; set; }
@@ -29,12 +22,12 @@ namespace Firewall_Status_Display.Data.Models
         public byte? Prec { get; set; }      // Deprecated
         public byte TTL { get; set; }
         public int PacketId { get; set; }
-        public IPProto Proto { get; set; }
+        public string Proto { get; set; }
         public int PortSrc { get; set; }
         public int PortDest { get; set; }
         public int Window { get; set; }
         public byte Res { get; set; }
-        public byte Flags { get; set; }
+        public int Flags { get; set; }
 
         // Geolocation info
         public string SrcCity { get; set; }

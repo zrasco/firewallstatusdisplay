@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -39,6 +40,11 @@ namespace Firewall_Status_Display
         public MainWindow()
         {
             InitializeComponent();
+
+            // Set status text
+            var vm = (MainViewModel)DataContext;
+            vm.SetStatusTextCommand.Execute("Ready.");
+            vm.SetStatusColorCommand.Execute(Brushes.Black);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -80,6 +86,10 @@ namespace Firewall_Status_Display
 
         private void ctxMenuExit_Click(object sender, Telerik.Windows.RadRoutedEventArgs e)
         {
+            // Wait for DB commit
+            ((MainViewModel)DataContext).CancelDBLoopCommand.Execute(null);
+            Task.Delay(5000);
+
             this.icon.Dispose();
             this.icon = null;
             Application.Current.Properties["CloseNotificationShown"] = true;

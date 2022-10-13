@@ -49,3 +49,21 @@ Geolocation
 	- Found acceptable solution to database concurrency issue
 		- Separated geolocation and firewall entries into two seperate DbContexts
 		- Created background thread to commit firewall entries once per minute instead of each time they come in
+
+10-10-22
+-------
+Database
+	- Shored up exception handling for added reliability
+	- Created firewall view using datagrid
+	- Created firewall view model with row items
+	- Added firewall view model data fields and methods
+	- Added and implemented firewall view model add entry DelegateCommand
+	- Added trigger for syslog recieve event to display entry on firewall tab
+		- Modified data repo interface to return the parsed firewall entry for easier processing
+		- Arranged columns to show most important info first
+		- Added additional fields to parser
+		- Added TCP flag checks for parser
+	- Fixed bug incorrectly counting the number of commits
+	- Added commit at shutdown
+	- Added status bar
+	- TODO: Add UI logger service for status bar & add program logger output view/viewmodel

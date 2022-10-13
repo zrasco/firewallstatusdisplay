@@ -14,7 +14,7 @@
     <Grid>
         <!-- Icon source: https://icons8.com/icon/hkmFpevNcYPV/data -->
         <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="120"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
@@ -23,20 +23,20 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Image Grid.Column="0">
+            <Image Grid.Column="0" Margin="12,0,0,0">
                 <Image.Source>
-                    <BitmapImage UriSource="/Images/zebslab-logo2.png"/>
+                    <BitmapImage UriSource="/Images/zebslab-logo3.png"/>
                 </Image.Source>
             </Image>
             <Grid Grid.Column="1">
-                <TextBlock Margin="10" Text="Firewall Status Display" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Name="txtHeading" Margin="10" Text="Firewall Status Display" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </Grid>
 
         </Grid>
         <telerik:RadNavigationView Grid.Row="1"
                                    x:Name="navigationView"
                                    CompactModeThresholdWidth="200"
-                                   ExpandedPaneWidth="200"
+                                   ExpandedPaneWidth="150"
                                    ExpandedModeThresholdWidth="400"
                                    PaneToggleButtonVisibility="Collapsed"
                                    PaneHeaderHeight="0">
@@ -81,6 +81,26 @@
             </telerik:RadNavigationView.PaneFooter>
             -->
         </telerik:RadNavigationView>
+        <StatusBar Grid.Row="2">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock Margin="10" Text="{Binding StatusText}" Foreground="{Binding StatusColor}"/>
+            </StatusBarItem>
+            <Separator Grid.Column="1"/>
+            <StatusBarItem Grid.Column="2">
+                <TextBlock Margin="10" Text="Copyright © 2022 Zebs Lab"/>
+            </StatusBarItem>
+        </StatusBar>
 
         <telerik:RadNotifyIcon x:Name="icon"
                                TrayIconSource="/Images/icons8-data-soft-fill-70.ico"

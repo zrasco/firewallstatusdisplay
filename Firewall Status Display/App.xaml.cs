@@ -11,6 +11,7 @@ using System.Configuration;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Navigation;
 using Telerik.Windows.Controls;
@@ -69,20 +70,13 @@ namespace Firewall_Status_Display
 
             base.OnStartup(e);
         }
-
         protected override async void OnExit(ExitEventArgs e)
         {
+            var vm = AppHost.Services.GetService<MainViewModel>();
+
             await AppHost.StopAsync();
 
             base.OnExit(e);
-        }
-
-        private static void BuildConfig(IConfigurationBuilder builder)
-        {
-            builder.SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                //.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-                .AddEnvironmentVariables();
         }
     }
 }
