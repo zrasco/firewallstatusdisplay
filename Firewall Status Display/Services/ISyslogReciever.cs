@@ -9,7 +9,7 @@ namespace Firewall_Status_Display.Services
     {
         event SyslogReciever.DataRecieved DataRecievedEvent;
 
-        Task<bool> StartAsync(CancellationToken cancellationToken = default);
+        Task<bool> StartAsync(int syslogPort, CancellationToken cancellationToken = default);
         Task StopAsync();
     }
 }

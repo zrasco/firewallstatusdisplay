@@ -24,5 +24,10 @@ namespace Firewall_Status_Display.Views
         {
             InitializeComponent();
         }
+
+        private void txtBoxSettings_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

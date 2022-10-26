@@ -54,6 +54,8 @@ Geolocation
 -------
 Database
 	- Shored up exception handling for added reliability
+
+UI
 	- Created firewall view using datagrid
 	- Created firewall view model with row items
 	- Added firewall view model data fields and methods
@@ -63,7 +65,17 @@ Database
 		- Arranged columns to show most important info first
 		- Added additional fields to parser
 		- Added TCP flag checks for parser
+	- Add UI logger service for status bar & add program logger output view/viewmodel
+		- Added function to change status bar text/color
+		- Added function to add entries to settings output log
+	- Added logger textbox to settings window
+	- Began adding log data outputs
+	- Added tab controls and basic layout to settings view
+
+Bugs/features 
 	- Fixed bug incorrectly counting the number of commits
 	- Added commit at shutdown
 	- Added status bar
-	- TODO: Add UI logger service for status bar & add program logger output view/viewmodel
+	- Wrote powershell script to listen on port 514 for testing purposes
+	- Increased reliability of UDP listener with bind check & one minute retry loop
+	- General refactoring

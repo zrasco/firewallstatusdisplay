@@ -2,6 +2,7 @@
 using Firewall_Status_Display.Services;
 using Firewall_Status_Display.Views;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,6 +30,7 @@ namespace Firewall_Status_Display.ViewModels
         private readonly IServiceProvider _services;
         private readonly IDataRepoService _dataRepoService;
         private readonly CancellationTokenSource _commitCancellationTokenSource;
+        private readonly UILogger _uiLogger;
 
         public MainViewModel()
         {
@@ -48,14 +50,11 @@ namespace Firewall_Status_Display.ViewModels
 
         public MainViewModel(ISyslogReciever syslogReciever,
                                 IServiceProvider services,
-                                IDataRepoService dataRepoService) : this()
+                                IDataRepoService dataRepoService,
+                                UILogger uiLogger) : this()
         {
-            // Start syslog reciever
-            _syslogReciever = syslogReciever;
-            _syslogReciever.DataRecievedEvent += SyslogDataRecieved;
-            
-            // Start in background
-            Task.Run(() => _syslogReciever.StartAsync());
+            // UI Logger
+            _uiLogger = uiLogger;
 
             // Inject other dependencies
             _services = services;
@@ -63,6 +62,26 @@ namespace Firewall_Status_Display.ViewModels
 
             // TODO: Add DelegateCommand when app is shut down
             _commitCancellationTokenSource = new CancellationTokenSource();
+
+            // Start syslog reciever
+            _syslogReciever = syslogReciever;
+            _syslogReciever.DataRecievedEvent += SyslogDataRecieved;
+            
+            // Start in background
+            Task.Run(async () =>
+            {
+                int syslogPort = 514;
+
+                // StartAsync won't return if successful
+                while (!await _syslogReciever.StartAsync(syslogPort, _commitCancellationTokenSource.Token))
+                {
+                    await Task.Delay(60000, _commitCancellationTokenSource.Token);
+                }
+                   
+            }, _commitCancellationTokenSource.Token);
+
+
+
             // Run our commit every minute in background
             Task.Run(async () =>
             {
@@ -79,6 +98,10 @@ namespace Firewall_Status_Display.ViewModels
                     catch (OperationCanceledException)
                     {
                         exit = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        _uiLogger.LogWarning(ex, "Exception in DB commit ");
                     }
                 }
 

@@ -1,4 +1,5 @@
-﻿using SharpDX.Direct3D10;
+﻿using Microsoft.Extensions.Logging;
+using SharpDX.Direct3D10;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,22 +30,27 @@ namespace Firewall_Status_Display.Services
     {
         private Memory<byte> _buffer;
         private UdpClient _listener;
+        private readonly UILogger _uiLogger;
 
         public delegate void DataRecieved(object sender, RecievedDataArgs args);
         public event DataRecieved DataRecievedEvent;
 
-        public SyslogReciever()
+        public SyslogReciever(UILogger uiLogger)
         {
-
+            _uiLogger = uiLogger;
         }
 
-        public async Task<bool> StartAsync(CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> StartAsync(int syslogPort, CancellationToken cancellationToken = new CancellationToken())
         {
             _buffer = new byte[65527];
 
             try
-            {
-                _listener = new UdpClient(new IPEndPoint(IPAddress.Any, 514));
+            {                
+                _listener = new UdpClient(new IPEndPoint(IPAddress.Any, syslogPort));
+
+                // If no exception we can log success
+                _uiLogger.SetStatusText($"Ready. Listening on UDP port {syslogPort}.", StatusTextColor.Ok);
+                _uiLogger.LogInformation($"Listening on UDP port {syslogPort}.");
 
                 await RecieveLoopAsync(cancellationToken);
 
@@ -52,6 +58,8 @@ namespace Firewall_Status_Display.Services
             }
             catch(Exception ex)
             {
+                _uiLogger.SetStatusText($"Unable to listen on UDP port {syslogPort}!", StatusTextColor.Error);
+                _uiLogger.LogError(ex, $"Failed to create listening socket on UDP port {syslogPort}. Will try again once per minute.");
                 return false;
             }
 

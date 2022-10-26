@@ -55,6 +55,7 @@ namespace Firewall_Status_Display
 
                     // Other services
                     services.AddSingleton<ISyslogReciever, SyslogReciever>();
+                    services.AddTransient<UILogger>();
 
                 })
                 .Build();

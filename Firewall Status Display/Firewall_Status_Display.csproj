@@ -66,6 +66,7 @@
   <Compile Include="Services\IGeolocationCache.cs" />
   <Compile Include="Services\ISyslogReciever.cs" />
   <Compile Include="Services\SyslogReciever.cs" />
+  <Compile Include="Services\UILogger.cs" />
   <Compile Include="ViewModels\FirewallViewModel.cs" />
   <Compile Include="ViewModels\MainViewModel.cs" />
   <Compile Include="ViewModels\SettingsViewModel.cs" />
@@ -83,6 +84,7 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="UDP listener PS script.txt" />
     <Resource Include="Images\zebslab-logo3.png" />
     <Content Include="worklog.txt" />
   </ItemGroup>

@@ -27,14 +27,18 @@ namespace Firewall_Status_Display
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _services;
-        public MainWindow(IServiceProvider services) : this()
+        private readonly UILogger _uiLogger;
+        public MainWindow(IServiceProvider services, UILogger uiLogger) : this()
         {
             _services = services;
+            _uiLogger = uiLogger;
 
             // Set current view
             var vm = (MainViewModel)DataContext;
             navigationView.SelectedItem = navigationView.Items[0];
             vm.NavCommand.Execute(_services.GetRequiredService<StatusView>());
+
+            _uiLogger.SetStatusText("Ready", StatusTextColor.Ok);
         }
 
         public MainWindow()
@@ -43,8 +47,6 @@ namespace Firewall_Status_Display
 
             // Set status text
             var vm = (MainViewModel)DataContext;
-            vm.SetStatusTextCommand.Execute("Ready.");
-            vm.SetStatusColorCommand.Execute(Brushes.Black);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
