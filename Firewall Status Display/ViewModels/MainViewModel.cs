@@ -80,9 +80,8 @@ namespace Firewall_Status_Display.ViewModels
                    
             }, _commitCancellationTokenSource.Token);
 
-
-
             // Run our commit every minute in background
+
             Task.Run(async () =>
             {
                 bool exit = false;
@@ -93,7 +92,14 @@ namespace Firewall_Status_Display.ViewModels
                     try
                     {
                         await Task.Delay(60000, _commitCancellationTokenSource.Token);
+
+                        // Update DB
                         await _dataRepoService.CommitChangesAsync();
+
+                        // Update status page
+                        var statusVM = _services.GetRequiredService<StatusViewModel>();
+                        statusVM.UpdateDBPageCommand.Execute(null);
+                        
                     }
                     catch (OperationCanceledException)
                     {

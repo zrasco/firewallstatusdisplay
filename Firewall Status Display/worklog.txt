@@ -79,3 +79,18 @@ Bugs/features
 	- Wrote powershell script to listen on port 514 for testing purposes
 	- Increased reliability of UDP listener with bind check & one minute retry loop
 	- General refactoring
+
+10-30-22
+--------
+UI
+	- Added status view with statistics and traffic tabs
+		- Added fields and methods to Statistics view model
+		- Added firewall entry statistics
+		- Added geolocation cache statistics
+		- Added graph for firewall entries per day
+		- Added update task in background for main program
+	- Added settings view items
+		- Database location
+		- Import Geolocation CSV
+Database/repo
+	- Added method to get all firewall entries

@@ -5,10 +5,163 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Firewall_Status_Display.Views"
              xmlns:vm="clr-namespace:Firewall_Status_Display.ViewModels"
+             xmlns:chart="clr-namespace:Telerik.Windows.Controls;assembly=Telerik.Windows.Controls.Chart"
+             xmlns:chartView="clr-namespace:Telerik.Windows.Controls.ChartView;assembly=Telerik.Windows.Controls.Chart"
+             xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:Background="White"
              DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=StatusViewModel}">
+    <UserControl.Resources>
+        <Style x:Key="FirstColumnTextStyle" 
+           TargetType="TextBlock" >
+            <Setter Property="Foreground" Value="{telerik:FluentResource ResourceKey=AccentBrush}" />
+            <Setter Property="MinWidth" Value="90" />
+            <Setter Property="Padding" Value="5 2 5 2" />
+        </Style>
+        <Style x:Key="ColumnTextStyle" 
+           TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Padding" Value="5 2 0 2" />
+        </Style>
+    </UserControl.Resources>
     <Grid>
-        <TextBlock Text="{Binding Content}"/>
+        <telerik:RadTabControl>
+            <telerik:RadTabItem Header="Traffic">
+                <telerik:RadLayoutControl>
+                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3">
+                        <telerik:LayoutControlGroup Orientation="Vertical">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="5*"/>
+                                    <RowDefinition Height="5*"/>
+                                </Grid.RowDefinitions>
+                                <telerik:RadTabControl Grid.Row="0">
+                                    <telerik:RadTabItem Header="Traffic info">
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Dropped amount:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="70.87MB" />
+                                            </StackPanel>
+
+                                        </StackPanel>
+                                    </telerik:RadTabItem>
+                                </telerik:RadTabControl>
+                                
+                            </Grid>
+                        </telerik:LayoutControlGroup>
+                        <telerik:LayoutControlGroup>
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="Geolocation chart" HorizontalAlignment="Left" />
+
+                                <telerik:RadPieChart Grid.Row="1" Palette="Fluent" Margin="6,0,0,0">
+                                    <telerik:PieSeries ItemsSource="{Binding GeoPieChartItems}" ShowLabels="True" ValueBinding="Value">
+                                        <telerik:PieSeries.LabelDefinitions>
+                                            <telerik:ChartSeriesLabelDefinition Binding="Label"/>
+                                        </telerik:PieSeries.LabelDefinitions>
+                                    </telerik:PieSeries>
+                                </telerik:RadPieChart>
+
+                            </Grid>
+                        </telerik:LayoutControlGroup>
+                    </telerik:LayoutControlGroup>
+
+                </telerik:RadLayoutControl>
+            </telerik:RadTabItem>
+            <telerik:RadTabItem Header="Statistics">
+                <telerik:RadLayoutControl>
+                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3">
+                        <telerik:LayoutControlGroup Orientation="Vertical">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="5*"/>
+                                    <RowDefinition Height="5*"/>
+                                </Grid.RowDefinitions>
+                                <telerik:RadTabControl Grid.Row="0">
+                                    <telerik:RadTabItem Header="Database">
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Log items:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding FirewallEntryCount}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Days of data:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding FirewallEntryDays}" />
+                                            </StackPanel>
+
+                                        </StackPanel>
+                                    </telerik:RadTabItem>
+                                </telerik:RadTabControl>
+                                <telerik:RadTabControl Grid.Row="1">
+                                    <telerik:RadTabItem Header="Geolocation cache">
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="# of hits:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding CacheHits}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="# of misses:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding CacheMisses}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Entries:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding CacheEntryTotal}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Limit:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding CacheLimit}" />
+                                            </StackPanel>
+
+                                        </StackPanel>
+                                    </telerik:RadTabItem>
+                                </telerik:RadTabControl>
+                            </Grid>
+                        </telerik:LayoutControlGroup>
+                        <telerik:LayoutControlGroup>
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="Firewall DB entries" HorizontalAlignment="Left" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0">
+                                    <Rectangle Fill="#0099BC" Height="2" Width="15" Margin="5,0" />
+                                    <TextBlock Text="Entries/day" Margin="0,0,9,0" />
+                                </StackPanel>
+                                <chart:RadCartesianChart Grid.Row="1" Palette="Fluent" Margin="6,0,0,0">
+                                    <chart:RadCartesianChart.Resources>
+                                        <DataTemplate x:Key="PointTemplate1">
+                                            <Ellipse Height="6" Width="6" Fill="#0099BC" />
+                                        </DataTemplate>
+                                        <DataTemplate x:Key="PointTemplate2">
+                                            <Ellipse Height="6" Width="6" Fill="#E74856" />
+                                        </DataTemplate>
+                                    </chart:RadCartesianChart.Resources>
+                                    <chart:RadCartesianChart.HorizontalAxis>
+                                        <chartView:CategoricalAxis />
+                                    </chart:RadCartesianChart.HorizontalAxis>
+                                    <chart:RadCartesianChart.VerticalAxis>
+                                        <chartView:LinearAxis />
+                                    </chart:RadCartesianChart.VerticalAxis>
+                                    <chart:RadCartesianChart.Grid>
+                                        <chartView:CartesianChartGrid MajorLinesVisibility="Y" StripLinesVisibility="Y" />
+                                    </chart:RadCartesianChart.Grid>
+                                    <chart:RadCartesianChart.Series>
+                                        <chartView:LineSeries ItemsSource="{Binding LogChartItems}"
+                                                              ValueBinding="ItemValue"
+                                                              CategoryBinding="Category" DisplayName="TestDisplayName">
+                                        </chartView:LineSeries>
+                                    </chart:RadCartesianChart.Series>
+                                </chart:RadCartesianChart>
+                            </Grid>
+                        </telerik:LayoutControlGroup>
+                    </telerik:LayoutControlGroup>
+
+                </telerik:RadLayoutControl>
+            </telerik:RadTabItem>
+        </telerik:RadTabControl>
     </Grid>
 </UserControl>

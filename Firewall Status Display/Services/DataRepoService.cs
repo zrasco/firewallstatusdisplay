@@ -90,6 +90,7 @@ namespace Firewall_Status_Display.Services
         private readonly FirewallDataContext _fwContext;
         private readonly HttpClient _httpClient;
         private readonly IGeolocationCache _geolocationCache;
+        private readonly Dictionary<string, string> _countryList;
         public DataRepoService(FirewallDataContext fwContext,
                                 GeolocationDataContext geoContext,
                                 HttpClient httpClient,
@@ -114,6 +115,21 @@ namespace Firewall_Status_Display.Services
 
             _httpClient.BaseAddress = new Uri("http://ip-api.com/batch");
             _geolocationCache = geolocationCache;
+
+            // Create the country list
+            _countryList = new Dictionary<string, string>();
+            CultureInfo[] getCultureInfo = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
+
+            foreach (CultureInfo getCulture in getCultureInfo)
+            {
+                RegionInfo getRegionInfo = new RegionInfo(getCulture.LCID);
+
+                //add each country into the Dictionary of code/name - no duplicate keys
+                if (!(_countryList.ContainsKey(getRegionInfo.Name)))
+                {
+                    _countryList.Add(getRegionInfo.TwoLetterISORegionName, getRegionInfo.EnglishName);
+                }
+            }
         }
 
         public async Task<int> CommitChangesAsync()
@@ -251,6 +267,10 @@ namespace Firewall_Status_Display.Services
                     if (Int32.TryParse(item.Split("=")[1], out int wdw))
                         retval.Window = wdw;
                 }
+                else if (item == "DROP" || item == "ACCEPT" || item == "REJECT")
+                {
+                    retval.RuleName = item;
+                }
                 else
                 {
                     Dictionary<string, int> flagDict = new Dictionary<string, int>();
@@ -349,6 +369,19 @@ namespace Firewall_Status_Display.Services
             // IP Address is probably public.
             // This doesn't catch some VPN ranges like OpenVPN and Hamachi.
             return false;
+        }
+
+        public async Task<List<FirewallEntry>> GetAllFirewallEntriesAsync()
+        {
+            return await _fwContext.FirewallEntries.ToListAsync();
+        }
+
+        public string GetCountryNameFrom2DigitCode(string countryCode)
+        {
+            if (_countryList.ContainsKey(countryCode))
+                return _countryList[countryCode];
+            else
+                return null;
         }
     }
 }

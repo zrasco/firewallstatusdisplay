@@ -9,5 +9,7 @@ namespace Firewall_Status_Display.Services
         Task<int> CommitChangesAsync();
         Task<FirewallEntry> AddFirewallEntryAsync(string rawLogLine);
         GeolocationEntry GetByIP(string ipAddr);
+        Task<List<FirewallEntry>> GetAllFirewallEntriesAsync();
+        string GetCountryNameFrom2DigitCode(string countryCode);
     }
 }
