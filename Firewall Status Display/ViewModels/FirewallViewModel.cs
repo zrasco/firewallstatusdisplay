@@ -59,6 +59,12 @@ namespace Firewall_Status_Display.ViewModels
         {
             entryList = new ObservableCollection<FirewallViewRowItem>();
             AddItemCommand = new DelegateCommand(OnAddItemCommandExecute);
+            ClearAllItemsCommand = new DelegateCommand(OnClearAllItemsCommandExecute);
+        }
+
+        private void OnClearAllItemsCommandExecute(object obj)
+        {
+            EntryList.Clear();
         }
 
         // Run-time ctor
@@ -92,5 +98,6 @@ namespace Firewall_Status_Display.ViewModels
         }
 
         public ICommand AddItemCommand { get; set; }
+        public ICommand ClearAllItemsCommand { get; set; }
     }
 }

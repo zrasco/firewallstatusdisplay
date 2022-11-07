@@ -31,6 +31,15 @@ using Index = CsvHelper.Configuration.Attributes.IndexAttribute;
 
 namespace Firewall_Status_Display.Services
 {
+    // Source for ServiceInfo class/code:
+    // https://stackoverflow.com/questions/13246099/using-c-sharp-to-reference-a-port-number-to-service-name
+    // Author: Mohammad Banisaeid
+    public class ServiceInfo
+    {
+        public ushort Port { get; set; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+    }
     public class GeolocationCSVEntry
     {
         [@Index(0)]
@@ -91,6 +100,7 @@ namespace Firewall_Status_Display.Services
         private readonly HttpClient _httpClient;
         private readonly IGeolocationCache _geolocationCache;
         private readonly Dictionary<string, string> _countryList;
+        private readonly List<ServiceInfo> _serviceList;
         public DataRepoService(FirewallDataContext fwContext,
                                 GeolocationDataContext geoContext,
                                 HttpClient httpClient,
@@ -115,6 +125,9 @@ namespace Firewall_Status_Display.Services
 
             _httpClient.BaseAddress = new Uri("http://ip-api.com/batch");
             _geolocationCache = geolocationCache;
+
+            // Create service list
+            _serviceList = ReadServicesFile();
 
             // Create the country list
             _countryList = new Dictionary<string, string>();
@@ -382,6 +395,59 @@ namespace Firewall_Status_Display.Services
                 return _countryList[countryCode];
             else
                 return null;
+        }
+
+        // Source for ServiceInfo class/code:
+        // https://stackoverflow.com/questions/13246099/using-c-sharp-to-reference-a-port-number-to-service-name
+        // Author: Mohammad Banisaeid
+
+        private List<ServiceInfo> ReadServicesFile()
+        {
+            var sysFolder = Environment.GetFolderPath(Environment.SpecialFolder.System);
+            if (!sysFolder.EndsWith("\\"))
+                sysFolder += "\\";
+
+            var svcFileName = sysFolder + "drivers\\etc\\services";
+
+            var lines = File.ReadAllLines(svcFileName);
+
+            var result = new List<ServiceInfo>();
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
+                    continue;
+
+                var info = new ServiceInfo();
+
+                var index = 0;
+
+                // Name
+                info.Name = line.Substring(index, 16).Trim();
+                index += 16;
+
+                // Port number and type
+                var temp = line.Substring(index, 9).Trim();
+                var tempSplitted = temp.Split('/');
+
+                info.Port = ushort.Parse(tempSplitted[0]);
+                info.Type = tempSplitted[1].ToLower();
+
+                result.Add(info);
+            }
+
+            return result;
+        }
+
+        public string GetServiceName(string protocol, ushort port)
+        {
+            string retval = null;
+            var svcResult = _serviceList.Where(x => x.Port == port && x.Type.Equals(protocol, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+
+            if (svcResult != null)
+                retval = svcResult.Name;
+
+            return retval;
         }
     }
 }

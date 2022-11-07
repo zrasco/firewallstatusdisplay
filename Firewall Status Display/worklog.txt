@@ -94,3 +94,9 @@ UI
 		- Import Geolocation CSV
 Database/repo
 	- Added method to get all firewall entries
+
+11-6-2022
+---------
+UI
+	- Added status view tab for traffic by port
+	- Added status view tab for port scans

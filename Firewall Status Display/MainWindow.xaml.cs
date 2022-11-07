@@ -51,7 +51,6 @@ namespace Firewall_Status_Display
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-#if DEBUG
             // Hide the window instead of closing it
             this.Hide();
 
@@ -72,7 +71,6 @@ namespace Firewall_Status_Display
 
             // Cancel the close event so we don't exit the program
             e.Cancel = true;
-#endif
         }
 
         private void icon_TrayIconMouseDoubleClick(object sender, MouseButtonEventArgs e)

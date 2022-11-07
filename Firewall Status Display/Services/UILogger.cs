@@ -44,6 +44,23 @@ namespace Firewall_Status_Display.Services
             // TODO: log event to file
         }
 
+        public void ShowTrayNotification(string text)
+        {
+            var wnd = _services.GetRequiredService<MainWindow>();
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                wnd.icon.BalloonIconSource = wnd.icon.TrayIconSource;
+                wnd.icon.BalloonTitle = "Firewall Status Display";
+                wnd.icon.PopupShowDuration = 5000;
+                wnd.icon.BalloonText = text;
+
+                wnd.icon.ShowBalloonTip();
+            });
+
+
+        }
+
 
         public void SetStatusText(string statusText, StatusTextColor statusColor)
         {

@@ -11,5 +11,7 @@ namespace Firewall_Status_Display.Services
         GeolocationEntry GetByIP(string ipAddr);
         Task<List<FirewallEntry>> GetAllFirewallEntriesAsync();
         string GetCountryNameFrom2DigitCode(string countryCode);
+
+        string GetServiceName(string protocol, ushort port);
     }
 }

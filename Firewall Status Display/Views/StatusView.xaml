@@ -26,7 +26,7 @@
     </UserControl.Resources>
     <Grid>
         <telerik:RadTabControl>
-            <telerik:RadTabItem Header="Traffic">
+            <telerik:RadTabItem Header="Traffic (Country)">
                 <telerik:RadLayoutControl>
                     <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3">
                         <telerik:LayoutControlGroup Orientation="Vertical">
@@ -40,7 +40,7 @@
                                         <StackPanel Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Dropped amount:" />
-                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="70.87MB" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding DroppedTraffic}" />
                                             </StackPanel>
 
                                         </StackPanel>
@@ -71,6 +71,147 @@
 
                 </telerik:RadLayoutControl>
             </telerik:RadTabItem>
+            <telerik:RadTabItem Header="Traffic (Ports)">
+                <telerik:RadLayoutControl>
+                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3">
+                        <telerik:LayoutControlGroup Orientation="Vertical">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="5*"/>
+                                    <RowDefinition Height="5*"/>
+                                </Grid.RowDefinitions>
+                                <telerik:RadTabControl Grid.Row="0">
+                                    <telerik:RadTabItem Header="Traffic info">
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Dropped amount:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding DroppedTraffic}" />
+                                            </StackPanel>
+
+                                        </StackPanel>
+                                    </telerik:RadTabItem>
+                                </telerik:RadTabControl>
+
+                            </Grid>
+                        </telerik:LayoutControlGroup>
+                        <telerik:LayoutControlGroup>
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="Incoming traffic by ports" HorizontalAlignment="Left" />
+
+                                <telerik:RadPieChart Grid.Row="1" Palette="Fluent" Margin="6,0,0,0">
+                                    <telerik:PieSeries ItemsSource="{Binding PortPieChartItems}" ShowLabels="True" ValueBinding="Value">
+                                        <telerik:PieSeries.LabelDefinitions>
+                                            <telerik:ChartSeriesLabelDefinition Binding="Label"/>
+                                        </telerik:PieSeries.LabelDefinitions>
+                                    </telerik:PieSeries>
+                                </telerik:RadPieChart>
+
+                            </Grid>
+                        </telerik:LayoutControlGroup>
+                    </telerik:LayoutControlGroup>
+
+                </telerik:RadLayoutControl>
+            </telerik:RadTabItem>
+            <telerik:RadTabItem Header="Port scans">
+                <telerik:RadLayoutControl ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <telerik:LayoutControlGroup Orientation="Vertical">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="5*"/>
+                                    <RowDefinition Height="5*"/>
+                                </Grid.RowDefinitions>
+                                <telerik:RadTabControl Grid.Row="0">
+                                    <telerik:RadTabItem Header="Port scan stats">
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Total scans:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding PortScanTotal}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Unique IPs:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding PortScanUniqueIPs}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Total packets:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding PortScanTotalPackets}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </telerik:RadTabItem>
+                                </telerik:RadTabControl>
+                                <telerik:RadTabControl Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <telerik:RadTabItem Header="Activity">
+                                        <ScrollViewer>
+                                            <telerik:RadGridView x:Name="radGridViewPortScans"
+                                                             ShowGroupPanel="True"
+							                                 ItemsSource="{Binding PortScanEntryList}"
+							                                 Margin="0" GroupRenderMode="Flat"
+							                                 RowIndicatorVisibility="Collapsed"
+							                                 IsReadOnly="True"
+                                                             ShowColumnSortIndexes="True"
+							                                 AutoGenerateColumns="True"
+							                                 CanUserFreezeColumns="False"
+							                                 CanUserResizeColumns="False"
+                                                             EnableMouseWheelScaling="True">
+                                            </telerik:RadGridView>
+                                        </ScrollViewer>
+
+                                            
+
+                                    </telerik:RadTabItem>
+
+                                </telerik:RadTabControl>
+
+                            </Grid>
+                        </telerik:LayoutControlGroup>
+                        <telerik:LayoutControlGroup>
+                            <Border BorderBrush="Black" BorderThickness="1">
+                                <Grid Margin="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="Port scans per day" HorizontalAlignment="Left" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0">
+                                        <Rectangle Fill="#0099BC" Height="2" Width="15" Margin="5,0" />
+                                        <TextBlock Text="Scans/day" Margin="0,0,9,0" />
+                                    </StackPanel>
+                                    <chart:RadCartesianChart Grid.Row="1" Palette="Fluent" Margin="6,0,0,0">
+                                        <chart:RadCartesianChart.Resources>
+                                            <DataTemplate x:Key="PointTemplate1">
+                                                <Ellipse Height="6" Width="6" Fill="#0099BC" />
+                                            </DataTemplate>
+                                            <DataTemplate x:Key="PointTemplate2">
+                                                <Ellipse Height="6" Width="6" Fill="#E74856" />
+                                            </DataTemplate>
+                                        </chart:RadCartesianChart.Resources>
+                                        <chart:RadCartesianChart.HorizontalAxis>
+                                            <chartView:CategoricalAxis />
+                                        </chart:RadCartesianChart.HorizontalAxis>
+                                        <chart:RadCartesianChart.VerticalAxis>
+                                            <chartView:LinearAxis />
+                                        </chart:RadCartesianChart.VerticalAxis>
+                                        <chart:RadCartesianChart.Grid>
+                                            <chartView:CartesianChartGrid MajorLinesVisibility="Y" StripLinesVisibility="Y" />
+                                        </chart:RadCartesianChart.Grid>
+                                        <chart:RadCartesianChart.Series>
+                                            <chartView:LineSeries ItemsSource="{Binding PortScanChartItems}"
+                                                              ValueBinding="ItemValue"
+                                                              CategoryBinding="Category" DisplayName="TestDisplayName">
+                                            </chartView:LineSeries>
+                                        </chart:RadCartesianChart.Series>
+                                    </chart:RadCartesianChart>
+                                </Grid>
+                            </Border>
+                            
+                        </telerik:LayoutControlGroup>
+                    </telerik:LayoutControlGroup>
+                </telerik:RadLayoutControl>
+            </telerik:RadTabItem>
             <telerik:RadTabItem Header="Statistics">
                 <telerik:RadLayoutControl>
                     <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3">
@@ -90,6 +231,10 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Days of data:" />
                                                 <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding FirewallEntryDays}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Items per day:" />
+                                                <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding AvgPerDay}" />
                                             </StackPanel>
 
                                         </StackPanel>

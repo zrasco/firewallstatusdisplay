@@ -13,7 +13,7 @@
         <Grid.Resources>
             <telerik:BinaryImageConverter x:Key="converter" />
         </Grid.Resources>
-        <telerik:RadGridView x:Name="radGridViewSwipes"
+        <telerik:RadGridView x:Name="radGridViewFirewall"
                              ShowGroupPanel="False"
 							 ItemsSource="{Binding EntryList}"
 							 Margin="0" GroupRenderMode="Flat"

@@ -1,21 +1,38 @@
-﻿using Firewall_Status_Display.Services;
+﻿using Firewall_Status_Display.Data.Models;
+using Firewall_Status_Display.Services;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OData.Client;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Xml.Linq;
 using Telerik.Windows.Controls;
+using Telerik.Windows.Documents.Spreadsheet.Model.DataValidation;
 using IServiceProvider = System.IServiceProvider;
 
 namespace Firewall_Status_Display.ViewModels
 {
+    public class PortScanRowItem
+    {
+        public DateTime TimeStamp { get; set; }
+        [Display(Name = "Src IP")]
+        public string IPSrc { get; set; }
+        public string Region { get; set; }
+        public string Country { get; set; }
+        public int Packets { get; set; }
+    }
+
     public class PieChartItem : INotifyPropertyChanged
     {
         public PieChartItem(string title = null, double amount = 0.0)
@@ -94,21 +111,28 @@ namespace Firewall_Status_Display.ViewModels
     }
     public class StatusViewModel : ViewModelBase
     {
-        private IDataRepoService _dataRepoService;
-        private IGeolocationCache _geolocationCache;
+        private readonly IDataRepoService _dataRepoService;
+        private readonly IGeolocationCache _geolocationCache;
+        private readonly IConfiguration _config;
+        private readonly UILogger _uilogger;
         public StatusViewModel(IDataRepoService dataRepoService,
-                                IGeolocationCache geolocationCache) : this()
+                                IGeolocationCache geolocationCache,
+                                IConfiguration config,
+                                IServiceProvider services,
+                                UILogger uilogger) : this()
         {
             _dataRepoService = dataRepoService;
             _geolocationCache = geolocationCache;
+            _config = config;
+            _uilogger = uilogger;
 
             PopulateDBPage();
-
+            
         }
         public StatusViewModel()
         {
 
-            // Test data for chart
+            // Test data for firewall chart
             LogChartItems = new ObservableCollection<LineChartItem>();
             LogChartItems.Add(new LineChartItem("10/2", 50));
             LogChartItems.Add(new LineChartItem("10/3", 60));
@@ -116,15 +140,45 @@ namespace Firewall_Status_Display.ViewModels
             LogChartItems.Add(new LineChartItem("10/5", 40));
             LogChartItems.Add(new LineChartItem("10/6", 50));
 
-            // Test data for pie chart
+            // Test data for country traffic pie chart
             GeoPieChartItems = new ObservableCollection<PieChartItem>();
             GeoPieChartItems.Add(new PieChartItem("Thing #1\n10%", 20));
             GeoPieChartItems.Add(new PieChartItem("Thing #2", 30));
             GeoPieChartItems.Add(new PieChartItem("Thing #3", 40));
             GeoPieChartItems.Add(new PieChartItem("Thing #4", 10));
 
+            // Test data for port traffic pie chart
+            PortPieChartItems = new ObservableCollection<PieChartItem>();
+            PortPieChartItems.Add(new PieChartItem("22\n20%", 20));
+            PortPieChartItems.Add(new PieChartItem("33\n20%", 20));
+            PortPieChartItems.Add(new PieChartItem("44\n20%", 20));
+            PortPieChartItems.Add(new PieChartItem("55\n20%", 20));
+            PortPieChartItems.Add(new PieChartItem("66\n20%", 20));
+
+            // Test data for port scan list
+            PortScanEntryList = new ObservableCollection<PortScanRowItem>();
+            PortScanChartItems = new ObservableCollection<LineChartItem>();
+
+            for (int x = -10; x < 0; x++)
+            {
+                PortScanEntryList.Add(new PortScanRowItem() { IPSrc = "1.2.3.4", TimeStamp = DateTime.Now.AddDays(x) });
+                PortScanChartItems.Add(new LineChartItem(DateTime.Now.AddDays(x).ToString("M/d"), 1));
+            }
+
 
             UpdateDBPageCommand = new DelegateCommand(OnUpdateDBPageCommandExecute);
+            AddPortScanItemCommand = new DelegateCommand(OnAddPortScanItemCommandExecute);
+            ClearAllPortScanItemsCommand = new DelegateCommand(OnClearAllPortScanItemsCommandExecute);
+        }
+
+        private void OnClearAllPortScanItemsCommandExecute(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void OnAddPortScanItemCommandExecute(object obj)
+        {
+            throw new NotImplementedException();
         }
 
         private void OnUpdateDBPageCommandExecute(object obj)
@@ -132,43 +186,186 @@ namespace Firewall_Status_Display.ViewModels
             PopulateDBPage();
         }
 
+
         private async void PopulateDBPage()
         {
             var items = new ObservableCollection<LineChartItem>();
-            var entries = (await _dataRepoService.GetAllFirewallEntriesAsync()).OrderBy(x => x.TimeStamp);
-            LineChartItem logChartItem = null;
+            var entriesUnordered = await _dataRepoService.GetAllFirewallEntriesAsync();
+            var entriesByTime = entriesUnordered.OrderBy(x => x.TimeStamp);
+            LineChartItem chartItem = null;
 
-            foreach (var entry in entries)
+            // Add firewall packet log chart data
+            foreach (var entry in entriesByTime)
             {
                 var dateStr = entry.TimeStamp.ToString("M/d");
 
-                if (logChartItem == null || logChartItem.Category != dateStr)
+                if (chartItem == null || chartItem.Category != dateStr)
                 {
-                    if (logChartItem != null)
-                        items.Add(logChartItem);
-                    logChartItem = new LineChartItem(dateStr);
+                    if (chartItem != null)
+                        items.Add(chartItem);
+                    chartItem = new LineChartItem(dateStr);
+                    chartItem.ItemValue++;
                 }
                 else
-                    logChartItem.ItemValue++;
+                    chartItem.ItemValue++;
             }
 
             // Add last log chart item
-            items.Add(logChartItem);
+            items.Add(chartItem);
 
-            // Set information
-            FirewallEntryCount = entries.Count();
+            // Set the line chart data
+            LogChartItems = items;
+
+            // Add port scan chart data
+            var thresholdPkts = _config.GetValue<int>("Options:PortScanning:ThresholdPkts");
+            var thresholdSecs = _config.GetValue<int>("Options:PortScanning:ThresholdSecs");
+
+            var candidateEntries = entriesByTime.GroupBy(x => x.IPSrc).Where(y => y.Count() > thresholdPkts);
+            var deleteMe = entriesByTime.Where(x => x.IPSrc == "192.241.153.165");
+
+
+            var portScanHits = new[] {
+                new  { IP = "", TimeStamp = DateTime.Now, DestPort = 0, Proto = "" }
+            }.ToList();
+            portScanHits.Clear();
+
+            // First pass. Get our rough groups
+            foreach (var entry in candidateEntries)
+            {
+                var entryList = entry.ToList();
+
+                for (int x = 0; x < entryList.Count() - thresholdPkts; x++)
+                {
+
+
+                    if (entryList[x].TimeStamp.AddSeconds(thresholdSecs) >= entryList[x + thresholdPkts].TimeStamp)
+                    {
+                        portScanHits.Add(new {
+                            IP = entryList[x].IPSrc, 
+                            TimeStamp = entryList[x].TimeStamp,
+                            DestPort = entryList[x].PortDest,
+                            Proto = entryList[x].Proto
+                        });
+                    }
+                }
+            }
+
+            // Second pass. Group & see if this is actually a port scan
+            var groupedScanReviewList = portScanHits.GroupBy(x => x.IP);
+            var lineItems = new List<PortScanRowItem>();
+            
+            foreach (var entry in groupedScanReviewList)
+            {
+                var entryList = entry.ToList();
+                var first = entryList.First();
+                var last = entryList.Last();
+
+                var suspectRange = entriesByTime.Where(x => x.IPSrc == entry.Key && x.TimeStamp >= first.TimeStamp && x.TimeStamp <= last.TimeStamp.AddSeconds(thresholdSecs)).ToList();
+
+                // Get distinct # of ports/protocols in this set
+
+                // Group by Time groups
+                int endRangeMarker = 0;
+                var groups = new List<List<FirewallEntry>>();
+                for (int x = 0; x < suspectRange.Count - 1; x++)
+                {
+                    if (suspectRange[x + 1].TimeStamp >= suspectRange[x].TimeStamp.AddSeconds(thresholdSecs))
+                    {
+                        // End of this group
+                        groups.Add(suspectRange.GetRange(endRangeMarker, (x + 1) - endRangeMarker));
+                        endRangeMarker = x + 1;
+                    }
+                    else if (x == suspectRange.Count - 2)
+                    {
+                        // Add final grouping
+                        groups.Add(suspectRange.GetRange(endRangeMarker, suspectRange.Count - endRangeMarker));
+                    }
+                }
+
+                // Only take groups over the threshold
+                groups = groups.Where(x => x.Count >= thresholdPkts).ToList();
+
+                foreach (var group in groups)
+                {
+                    var distinctEntries = group.Select(x => new { x.Proto, x.PortDest }).Distinct().Count();
+
+                    if (distinctEntries >= 7)
+                    {
+                        // Most likely a port scan
+
+                        // We may have multiple scans per IP
+                        lineItems.Add(new PortScanRowItem() {
+                            IPSrc = entry.Key,
+                            TimeStamp = group[0].TimeStamp,
+                            Country = _dataRepoService.GetCountryNameFrom2DigitCode(group[0].SrcCountryCode),
+                            Region = group[0].SrcRegion,
+                            Packets = group.Count()
+                        });
+                    }
+                }
+            }
+
+            // Set the final list
+            var newPortScanEntryList = new ObservableCollection<PortScanRowItem>(lineItems.OrderByDescending(x => x.TimeStamp));
+
+            if (newPortScanEntryList.Count > PortScanEntryList.Count)
+            {
+                // We have a new port scan. Send notification
+                var notificationIPEntries = newPortScanEntryList.ToList().GetRange(0, newPortScanEntryList.Count - PortScanEntryList.Count);
+
+                string notification = "Detected port scan from the following IPs:\n";
+
+                foreach (var notifyentry in notificationIPEntries)
+                {
+                    notification += $"{notifyentry.IPSrc}\n";
+                }
+
+                // Alert user.
+                _uilogger.ShowTrayNotification(notification);
+
+            }
+
+            PortScanEntryList = newPortScanEntryList;
+
+            // Update port scan chart
+            chartItem = null;
+            items = new ObservableCollection<LineChartItem>();
+            foreach (var entry in PortScanEntryList.OrderBy(x => x.TimeStamp))
+            {
+                var dateStr = entry.TimeStamp.ToString("M/d");
+
+                if (chartItem == null || chartItem.Category != dateStr)
+                {
+                    if (chartItem != null)
+                        items.Add(chartItem);
+                    chartItem = new LineChartItem(dateStr);
+                    chartItem.ItemValue++;
+                }
+                else
+                    chartItem.ItemValue++;
+            }
+
+            // Add last port scan chart item
+            items.Add(chartItem);
+
+            PortScanChartItems = items;
+
+            // Set stat information
+            FirewallEntryCount = entriesByTime.Count();
             FirewallEntryDays = items.Count;
             CacheEntryTotal = _geolocationCache.Entries();
             CacheHits = _geolocationCache.Hits();
             CacheMisses = _geolocationCache.Misses();
             CacheLimit = _geolocationCache.Limit();
-
-            // Set the line chart data
-            LogChartItems = items;
+            PortScanTotal = PortScanEntryList.Count;
+            PortScanTotalPackets = PortScanEntryList.Sum(x => x.Packets);
+            PortScanUniqueIPs = PortScanEntryList?.Select(x => x.IPSrc)?.Distinct()?.Count() ?? 0;
 
             // Set the pie chart data
+
+            // Geolocation pie chart
             GeoPieChartItems = new ObservableCollection<PieChartItem>();
-            var geoEntries = (await _dataRepoService.GetAllFirewallEntriesAsync()).GroupBy(x => x.SrcCountryCode).OrderByDescending(x => x.Count()).ToList();
+            var geoEntries = entriesUnordered.GroupBy(x => x.SrcCountryCode).OrderByDescending(x => x.Count()).ToList();
 
             // Top 10 source countries
             for (int x = 0; x < 10; x++)
@@ -176,18 +373,59 @@ namespace Firewall_Status_Display.ViewModels
                 GeoPieChartItems.Add(new PieChartItem(_dataRepoService.GetCountryNameFrom2DigitCode(geoEntries[x].Key), geoEntries[x].Count()));
             }
 
-            // Create labels for pie chart
+            // Port pie chart
+            PortPieChartItems = new ObservableCollection<PieChartItem>();
+            var portEntries = entriesUnordered
+                .Where(x => x.PortDest > 0)
+                .GroupBy(x => new { x.PortDest, x.Proto })
+                .OrderByDescending(x => x.Count()).ToList();
+
+            // Top 10 destination ports
+            for (int x = 0; x < 10; x++)
+            {
+                var grp = portEntries[x].Key;
+                int port = grp.PortDest;
+                string proto = grp.Proto;
+                string title;
+
+                // Get the name of our service
+                string svcName = _dataRepoService.GetServiceName(grp.Proto, (ushort)port);
+
+                if (svcName == null)
+                    title = $"{grp.Proto}/{port.ToString()}";
+                else
+                    title = svcName;
+
+                PortPieChartItems.Add(new PieChartItem(title, portEntries[x].Count()));
+            }
+
+            // Create labels for pie charts
+
+            // Geolocation pie chart
             var pieChartTotal = GeoPieChartItems.Select(x => x.Value).Sum();
             foreach (var item in GeoPieChartItems)
             {
                 item.Label = $"{item.Title}\n{Math.Round((item.Value/pieChartTotal) * 100,2)}%";
             }
 
+            // Port pie chart
+            var portPieChartTotal = PortPieChartItems.Select(x => x.Value).Sum();
+            foreach (var item in PortPieChartItems)
+            {
+                item.Label = $"{item.Title}\n{Math.Round((item.Value / portPieChartTotal) * 100, 2)}%";
+            }
+
+            // Get our traffic amount
+            var amt = entriesUnordered.Sum(x => x.Length);
+            var mb = (amt / 1024d) / 1024d;
+            DroppedTraffic = mb.ToString("0.00MB");
+
             // Set average per day
             AvgPerDay = Convert.ToInt32(LogChartItems.Select(x => x.ItemValue).Average());
 
         }
 
+        #region Variables
         private int avgPerDay;
 
         /// <summary>
@@ -289,6 +527,65 @@ namespace Firewall_Status_Display.ViewModels
             }
         }
 
+        /// <summary>
+        /// Dropped traffic amount
+        /// </summary>
+        private string droppedTraffic;
+
+        public string DroppedTraffic
+        {
+            get { return droppedTraffic; }
+            set
+            {
+                droppedTraffic = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Total number of Port scans
+        /// </summary>
+        private int portScanTotal;
+
+        public int PortScanTotal
+        {
+            get { return portScanTotal; }
+            set
+            {
+                portScanTotal = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Unique IPs amongst all port scans
+        /// </summary>
+        private int portScanUniqueIPs;
+
+        public int PortScanUniqueIPs
+        {
+            get { return portScanUniqueIPs; }
+            set
+            {
+                portScanUniqueIPs = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Total number of port scan traffic packets
+        /// </summary>
+        private int portScanTotalPackets;
+        public int PortScanTotalPackets
+        {
+            get { return portScanTotalPackets; }
+            set
+            {
+                portScanTotalPackets = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private ObservableCollection<LineChartItem> logChartItems;
 
         /// <summary>
@@ -300,6 +597,21 @@ namespace Firewall_Status_Display.ViewModels
             set
             {
                 logChartItems = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<LineChartItem> portScanChartItems;
+
+        /// <summary>
+        /// Firewall chart data
+        /// </summary>
+        public ObservableCollection<LineChartItem> PortScanChartItems
+        {
+            get => portScanChartItems;
+            set
+            {
+                portScanChartItems = value;
                 RaisePropertyChanged();
             }
         }
@@ -319,6 +631,34 @@ namespace Firewall_Status_Display.ViewModels
             }
         }
 
-        public ICommand UpdateDBPageCommand;
+        private ObservableCollection<PieChartItem> portPieChartItems;
+
+        /// <summary>
+        /// Firewall chart data
+        /// </summary>
+        public ObservableCollection<PieChartItem> PortPieChartItems
+        {
+            get => portPieChartItems;
+            set
+            {
+                portPieChartItems = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<PortScanRowItem> portScanEntryList { get; set; }
+
+        public ObservableCollection<PortScanRowItem> PortScanEntryList
+        {
+            get { return portScanEntryList; }
+            set { portScanEntryList = value; RaisePropertyChanged(); }
+        }
+
+        #endregion
+        #region ICommands
+        public ICommand AddPortScanItemCommand { get; set; }
+        public ICommand ClearAllPortScanItemsCommand { get; set; }
+        public ICommand UpdateDBPageCommand { get; set; }
+        #endregion
     }
 }
