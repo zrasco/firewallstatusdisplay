@@ -5,7 +5,7 @@ namespace Firewall_Status_Display.Services
 {
     public interface IGeolocationCache
     {
-        Task<bool> ImportGeolocationCSVAsync(string pathName);
+        Task<bool> ImportGeolocationCSVAsync(string pathName, bool tempFile = false);
         GeolocationEntry GetGeolocationInfo(string ipAddr);
 
         // Statistic functions

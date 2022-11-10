@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Firewall_Status_Display.Services
 {
@@ -29,12 +31,13 @@ namespace Firewall_Status_Display.Services
         private List<string> _ipEntries;
         private Dictionary<string, GeolocationEntry> _geoTable;
         private GeolocationDataContext _geoContext;
+        private IServiceProvider _services;
 
         // Statistics
         private int _misses;
         private int _hits;
 
-        public GeolocationCache(GeolocationDataContext context)
+        public GeolocationCache(GeolocationDataContext context, IServiceProvider services)
         {
             _ipEntries = new List<string>();
             _geoTable = new Dictionary<string, GeolocationEntry>();
@@ -54,6 +57,8 @@ namespace Firewall_Status_Display.Services
             }
             catch { }
 
+            _services = services;
+
             // Import!!
             //_ = ImportGeolocationCSVAsync(@"D:\Users\zrasco\Downloads\dbip-city-lite-2022-09.csv\dbip-city-lite-2022-09.csv").Result;
         }
@@ -63,13 +68,13 @@ namespace Firewall_Status_Display.Services
             if (_geoTable.ContainsKey(ipAddr))
             {
                 _hits++;
-                Debug.Print($"Cache hit for {ipAddr}");
+                //Debug.Print($"Cache hit for {ipAddr}");
             }
             else
             {
                 _misses++;
                 // Not in cache
-                Debug.Print($"Cache miss for {ipAddr}");
+                //Debug.Print($"Cache miss for {ipAddr}");
 
                 // Check if cache is full
                 while (_ipEntries.Count >= CACHE_LIMIT)
@@ -111,17 +116,21 @@ namespace Firewall_Status_Display.Services
             long ip = ToInt(ipAddr);
 
             // ~720ms for 255 entries
-            Debug.Print($"Retrieval for geolocation started for ID {Thread.CurrentThread.ManagedThreadId}");
+            //Debug.Print($"Retrieval for geolocation started for ID {Thread.CurrentThread.ManagedThreadId}");
             var retval = _geoContext.GeolocationEntries.Where(p => p.BeginningIP <= ip).OrderByDescending(p => p.BeginningIP).FirstOrDefault();
-            Debug.Print($"Retrieval for geolocation ended for ID {Thread.CurrentThread.ManagedThreadId}");
+            //Debug.Print($"Retrieval for geolocation ended for ID {Thread.CurrentThread.ManagedThreadId}");
             return retval;
 
             // ~800ms for 255
             //return _context.GeolocationEntries.Where(p => p.BeginningIP <= ip && p.BeginningIP >= ip-65535 && p.EndingIP >= ip).FirstOrDefault();
         }
 
-        public async Task<bool> ImportGeolocationCSVAsync(string pathName)
+        public async Task<bool> ImportGeolocationCSVAsync(string pathName, bool tempFile)
         {
+            var uiLogger = _services.GetRequiredService<UILogger>();
+
+            uiLogger.LogInformation("Beginning Geolocation DB import. Reading CSV data...");
+
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = false,
@@ -132,14 +141,31 @@ namespace Firewall_Status_Display.Services
                 using (var csv = new CsvReader(reader, config))
                 {
                     // Skip IPv6
-                    var records = csv.GetRecords<GeolocationCSVEntry>().TakeWhile(p => p.BeginningIPStr != "::");
+                    var recordsAsyncIterator = csv.GetRecordsAsync<GeolocationCSVEntry>();
+                    List<GeolocationCSVEntry> recordList = new List<GeolocationCSVEntry>();
+                        //.TakeWhile(p => p.BeginningIPStr != "::");
 
                     // Delete all existing rows in the table
                     //await _geoContext.Database.ExecuteSqlRawAsync($"TRUNCATE TABLE [{nameof(_geoContext.GeolocationEntries)}]");
 
-                    var recordList = records.ToList();
+                    await foreach (var record in recordsAsyncIterator)
+                    {
+                        if (record.BeginningIPStr.Contains("::"))
+                            break;
+                        recordList.Add(record);
+                    }
 
-                    _geoContext.GeolocationEntries.AddRange(recordList.Select(x => new GeolocationEntry()
+                    if (tempFile)
+                    {
+                        uiLogger.LogInformation($"Temp file {pathName} deleted.");
+                        File.Delete(pathName);
+                    }
+
+                    uiLogger.LogInformation("All CSV data read.");
+
+                    uiLogger.LogInformation("Updating DB...");
+                    _geoContext.GeolocationEntries.RemoveRange(_geoContext.GeolocationEntries);
+                    await _geoContext.GeolocationEntries.AddRangeAsync(recordList.Select(x => new GeolocationEntry()
                     {
                         BeginningIP = ToInt(x.BeginningIPStr),
                         EndingIP = ToInt(x.EndingIPStr),
@@ -152,9 +178,10 @@ namespace Firewall_Status_Display.Services
                     }));
                 }
             }
-            // Normal way
-            _geoContext.SaveChanges();
 
+            // Async way
+            await _geoContext.SaveChangesAsync();
+            uiLogger.LogInformation($"Geolocation import complete. {_geoContext.GeolocationEntries.Count()} records imported");
 
             return true;
         }

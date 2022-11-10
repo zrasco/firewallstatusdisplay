@@ -93,14 +93,12 @@ namespace Firewall_Status_Display.Services
     }
     public class DataRepoService : IDataRepoService
     {
-        // Must be 50 or less for ip-api
-        private const int ENTRIES_BEFORE_GEOLOCATION = 4;
-
         private readonly FirewallDataContext _fwContext;
         private readonly HttpClient _httpClient;
         private readonly IGeolocationCache _geolocationCache;
         private readonly Dictionary<string, string> _countryList;
         private readonly List<ServiceInfo> _serviceList;
+        private Queue<string> _entryQueue;
         public DataRepoService(FirewallDataContext fwContext,
                                 GeolocationDataContext geoContext,
                                 HttpClient httpClient,
@@ -143,6 +141,9 @@ namespace Firewall_Status_Display.Services
                     _countryList.Add(getRegionInfo.TwoLetterISORegionName, getRegionInfo.EnglishName);
                 }
             }
+
+            // Create entry queue for failures
+            _entryQueue = new Queue<string>();
         }
 
         public async Task<int> CommitChangesAsync()
@@ -158,34 +159,43 @@ namespace Firewall_Status_Display.Services
             return commits;
         }
 
-        public async Task<FirewallEntry> AddFirewallEntryAsync(string rawLogLine)
+        public async Task<List<FirewallEntry>> AddFirewallEntryAsync(string rawLogLine)
         {
+            List<FirewallEntry> entries = new List<FirewallEntry>();
             FirewallEntry fwEntry = null;
 
             try
             {
-                // Check if this is a firewall line. If not, skip
-                fwEntry = ParseIntoFirewallEntry(rawLogLine);
+                // Add to queue
+                _entryQueue.Enqueue(rawLogLine);
 
-                if (fwEntry != null)
+                // Process enqueued items
+                while (_entryQueue.TryPeek(out string result))
                 {
-                    await _fwContext.FirewallEntries.AddAsync(fwEntry);
+                    // Check if this is a firewall line. If not, skip
+                    fwEntry = ParseIntoFirewallEntry(result);
 
-                    /*
-                    var json = File.ReadAllText("fwData.json");
-                    var list = JsonConvert.DeserializeObject<List<FirewallEntry>>(json);
-                    _fwContext.FirewallEntries.AddRange(list.Where(x => x.Id == 0).ToList());
-                    */
+                    // If this fails it will throw an exception
+                    if (fwEntry != null)
+                    {
+                        await _fwContext.FirewallEntries.AddAsync(fwEntry);
+                        entries.Add(fwEntry);
+                    }
+
+                    
+                    _entryQueue.Dequeue();
                 }
+
             }
             catch
             {
-                return null;
+                // Error in parsing (probably geolocation being updated or DB issue)
+                return entries;
             }
 
 
 
-            return fwEntry;
+            return entries;
         }
 
         private FirewallEntry ParseIntoFirewallEntry(string rawData)

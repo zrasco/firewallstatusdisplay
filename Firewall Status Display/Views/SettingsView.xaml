@@ -21,8 +21,7 @@
                  AcceptsReturn="True"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                 IsReadOnly="True"
-                 TextChanged="txtBoxSettings_TextChanged"/>
+                 IsReadOnly="True"/>
             </telerik:RadTabItem>
         </telerik:RadTabControl>
         
@@ -53,7 +52,8 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Grid.Column="0" Text="Geolocation database last updated:"/>
-                            <telerik:RadButton Margin="0,10,0,0" Content="Import geolocation file" HorizontalAlignment="Left"/>
+                            <telerik:RadButton Margin="0,10,0,0" x:Name="btnOpenGeoSite" Content="Open website" HorizontalAlignment="Left" Click="btnOpenGeoSite_Click"/>
+                            <telerik:RadButton Margin="0,0,0,0" x:Name="btnImportGeoSite" Content="Import DB-IP geolocation file (IP to City Lite)" HorizontalAlignment="Left" Click="btnImportGeoSite_Click"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <TextBox Text="October 16th, 2022"/>

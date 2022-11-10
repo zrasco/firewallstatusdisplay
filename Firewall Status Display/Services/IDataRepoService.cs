@@ -7,7 +7,7 @@ namespace Firewall_Status_Display.Services
     public interface IDataRepoService
     {
         Task<int> CommitChangesAsync();
-        Task<FirewallEntry> AddFirewallEntryAsync(string rawLogLine);
+        Task<List<FirewallEntry>> AddFirewallEntryAsync(string rawLogLine);
         GeolocationEntry GetByIP(string ipAddr);
         Task<List<FirewallEntry>> GetAllFirewallEntriesAsync();
         string GetCountryNameFrom2DigitCode(string countryCode);

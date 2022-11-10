@@ -115,6 +115,8 @@ namespace Firewall_Status_Display.ViewModels
         private readonly IGeolocationCache _geolocationCache;
         private readonly IConfiguration _config;
         private readonly UILogger _uilogger;
+        private bool _init;
+
         public StatusViewModel(IDataRepoService dataRepoService,
                                 IGeolocationCache geolocationCache,
                                 IConfiguration config,
@@ -125,6 +127,8 @@ namespace Firewall_Status_Display.ViewModels
             _geolocationCache = geolocationCache;
             _config = config;
             _uilogger = uilogger;
+
+            _init = true;
 
             PopulateDBPage();
             
@@ -310,21 +314,29 @@ namespace Firewall_Status_Display.ViewModels
 
             if (newPortScanEntryList.Count > PortScanEntryList.Count)
             {
-                // We have a new port scan. Send notification
-                var notificationIPEntries = newPortScanEntryList.ToList().GetRange(0, newPortScanEntryList.Count - PortScanEntryList.Count);
-
-                string notification = "Detected port scan from the following IPs:\n";
-
-                foreach (var notifyentry in notificationIPEntries)
+                // Don't show the alert during the init/first refresh
+                if (_init == true)
                 {
-                    notification += $"{notifyentry.IPSrc}\n";
+                    _init = false;
                 }
+                else
+                {
+                    // We have a new port scan. Send notification
+                    var notificationIPEntries = newPortScanEntryList.ToList().GetRange(0, newPortScanEntryList.Count - PortScanEntryList.Count);
 
-                // Alert user.
-                _uilogger.ShowTrayNotification(notification);
+                    string notification = "Detected port scan from the following IPs:\n";
 
+                    foreach (var notifyentry in notificationIPEntries)
+                    {
+                        notification += $"{notifyentry.IPSrc}\n";
+                    }
+
+                    // Alert user.
+                    _uilogger.ShowTrayNotification(notification);
+                }
             }
 
+            // Set display list of port scans to new list
             PortScanEntryList = newPortScanEntryList;
 
             // Update port scan chart
@@ -352,11 +364,12 @@ namespace Firewall_Status_Display.ViewModels
 
             // Set stat information
             FirewallEntryCount = entriesByTime.Count();
-            FirewallEntryDays = items.Count;
+            FirewallEntryDays = LogChartItems.Count;
             CacheEntryTotal = _geolocationCache.Entries();
             CacheHits = _geolocationCache.Hits();
             CacheMisses = _geolocationCache.Misses();
             CacheLimit = _geolocationCache.Limit();
+
             PortScanTotal = PortScanEntryList.Count;
             PortScanTotalPackets = PortScanEntryList.Sum(x => x.Packets);
             PortScanUniqueIPs = PortScanEntryList?.Select(x => x.IPSrc)?.Distinct()?.Count() ?? 0;
