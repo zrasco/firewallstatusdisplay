@@ -26,9 +26,9 @@
     </UserControl.Resources>
     <Grid>
         <telerik:RadTabControl>
-            <telerik:RadTabItem Header="Traffic (Country)">
-                <telerik:RadLayoutControl>
-                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3">
+            <telerik:RadTabItem Header="Traffic (country)">
+                <telerik:RadLayoutControl ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <telerik:LayoutControlGroup Orientation="Vertical">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -36,17 +36,39 @@
                                     <RowDefinition Height="5*"/>
                                 </Grid.RowDefinitions>
                                 <telerik:RadTabControl Grid.Row="0">
-                                    <telerik:RadTabItem Header="Traffic info">
+                                    <telerik:RadTabItem Header="Traffic stats">
                                         <StackPanel Orientation="Vertical">
+
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Dropped amount:" />
                                                 <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding DroppedTraffic}" />
                                             </StackPanel>
-
                                         </StackPanel>
                                     </telerik:RadTabItem>
                                 </telerik:RadTabControl>
-                                
+                                <telerik:RadTabControl Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <telerik:RadTabItem Header="Ranking by country">
+                                        <ScrollViewer>
+                                            <telerik:RadGridView x:Name="radGridViewPortScans"
+                                                             ShowGroupPanel="False"
+							                                 ItemsSource="{Binding TrafficByCountryListItems}"
+							                                 Margin="0" GroupRenderMode="Flat"
+							                                 RowIndicatorVisibility="Collapsed"
+							                                 IsReadOnly="True"
+                                                             ShowColumnSortIndexes="True"
+							                                 AutoGenerateColumns="True"
+							                                 CanUserFreezeColumns="False"
+							                                 CanUserResizeColumns="False"
+                                                             EnableMouseWheelScaling="True">
+                                            </telerik:RadGridView>
+                                        </ScrollViewer>
+
+
+
+                                    </telerik:RadTabItem>
+
+                                </telerik:RadTabControl>
+
                             </Grid>
                         </telerik:LayoutControlGroup>
                         <telerik:LayoutControlGroup>
@@ -68,12 +90,11 @@
                             </Grid>
                         </telerik:LayoutControlGroup>
                     </telerik:LayoutControlGroup>
-
                 </telerik:RadLayoutControl>
             </telerik:RadTabItem>
-            <telerik:RadTabItem Header="Traffic (Ports)">
-                <telerik:RadLayoutControl>
-                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3">
+            <telerik:RadTabItem Header="Traffic (ports)">
+                <telerik:RadLayoutControl ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <telerik:LayoutControlGroup Orientation="Horizontal" Margin="3" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <telerik:LayoutControlGroup Orientation="Vertical">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -81,15 +102,36 @@
                                     <RowDefinition Height="5*"/>
                                 </Grid.RowDefinitions>
                                 <telerik:RadTabControl Grid.Row="0">
-                                    <telerik:RadTabItem Header="Traffic info">
+                                    <telerik:RadTabItem Header="Traffic stats">
                                         <StackPanel Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Style="{StaticResource FirstColumnTextStyle}" Text="Dropped amount:" />
                                                 <TextBlock Style="{StaticResource ColumnTextStyle}" Text="{Binding DroppedTraffic}" />
                                             </StackPanel>
-
                                         </StackPanel>
                                     </telerik:RadTabItem>
+                                </telerik:RadTabControl>
+                                <telerik:RadTabControl Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <telerik:RadTabItem Header="Ranking by port">
+                                        <ScrollViewer>
+                                            <telerik:RadGridView x:Name="radGridViewTrafficCountries"
+                                                             ShowGroupPanel="False"
+							                                 ItemsSource="{Binding TrafficByPortListItems}"
+							                                 Margin="0" GroupRenderMode="Flat"
+							                                 RowIndicatorVisibility="Collapsed"
+							                                 IsReadOnly="True"
+                                                             ShowColumnSortIndexes="True"
+							                                 AutoGenerateColumns="True"
+							                                 CanUserFreezeColumns="False"
+							                                 CanUserResizeColumns="False"
+                                                             EnableMouseWheelScaling="True">
+                                            </telerik:RadGridView>
+                                        </ScrollViewer>
+
+
+
+                                    </telerik:RadTabItem>
+
                                 </telerik:RadTabControl>
 
                             </Grid>
@@ -113,7 +155,6 @@
                             </Grid>
                         </telerik:LayoutControlGroup>
                     </telerik:LayoutControlGroup>
-
                 </telerik:RadLayoutControl>
             </telerik:RadTabItem>
             <telerik:RadTabItem Header="Port scans">
@@ -146,7 +187,7 @@
                                 <telerik:RadTabControl Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Visible">
                                     <telerik:RadTabItem Header="Activity">
                                         <ScrollViewer>
-                                            <telerik:RadGridView x:Name="radGridViewPortScans"
+                                            <telerik:RadGridView x:Name="radGridViewPortTraffic"
                                                              ShowGroupPanel="True"
 							                                 ItemsSource="{Binding PortScanEntryList}"
 							                                 Margin="0" GroupRenderMode="Flat"

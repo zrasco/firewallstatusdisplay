@@ -84,6 +84,9 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ports.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="UDP listener PS script.txt" />
     <Resource Include="Images\zebslab-logo3.png" />
     <Content Include="worklog.txt" />

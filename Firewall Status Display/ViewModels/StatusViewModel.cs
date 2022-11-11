@@ -24,6 +24,33 @@ using IServiceProvider = System.IServiceProvider;
 
 namespace Firewall_Status_Display.ViewModels
 {
+    public class TrafficByCountryRowItem
+    {
+        public TrafficByCountryRowItem(string country = "", int packets = 0, string percentage = "0.0%")
+        {
+            Country = country;
+            Packets = packets;
+            Percentage = percentage;
+        }
+        public string Country { get; set; }
+        public int Packets { get; set; }
+        public string Percentage { get; set; }
+    }
+    public class TrafficByPortRowItem
+    {
+        public TrafficByPortRowItem(string serviceName = "unknown", int port = 0, int packets = 0, string percentage = "0.0%")
+        {
+            ServiceName = serviceName;
+            Port = port;
+            Packets = packets;
+            Percentage = percentage;
+        }
+
+        public string ServiceName { get; set; }
+        public int Port { get; set; }
+        public int Packets { get; set; }
+        public string Percentage { get; set; }
+    }
     public class PortScanRowItem
     {
         public DateTime TimeStamp { get; set; }
@@ -160,6 +187,22 @@ namespace Firewall_Status_Display.ViewModels
             PortPieChartItems.Add(new PieChartItem("55\n20%", 20));
             PortPieChartItems.Add(new PieChartItem("66\n20%", 20));
 
+            // Test data for port traffic ranking chart
+            TrafficByPortListItems = new ObservableCollection<TrafficByPortRowItem>();
+            TrafficByPortListItems.Add(new TrafficByPortRowItem("http", 80, 500, "20%"));
+            TrafficByPortListItems.Add(new TrafficByPortRowItem("ftp", 80, 500, "20%"));
+            TrafficByPortListItems.Add(new TrafficByPortRowItem("irc", 80, 500, "20%"));
+            TrafficByPortListItems.Add(new TrafficByPortRowItem("dns", 80, 500, "20%"));
+            TrafficByPortListItems.Add(new TrafficByPortRowItem("https", 80, 500, "20%"));
+
+            // Test data for country traffic ranking chart
+            TrafficByCountryListItems = new ObservableCollection<TrafficByCountryRowItem>();
+            TrafficByCountryListItems.Add(new TrafficByCountryRowItem("USA", 500, "20%"));
+            TrafficByCountryListItems.Add(new TrafficByCountryRowItem("Canada", 500, "20%"));
+            TrafficByCountryListItems.Add(new TrafficByCountryRowItem("Mexico", 500, "20%"));
+            TrafficByCountryListItems.Add(new TrafficByCountryRowItem("Brazil", 500, "20%"));
+            TrafficByCountryListItems.Add(new TrafficByCountryRowItem("Russia", 500, "20%"));
+
             // Test data for port scan list
             PortScanEntryList = new ObservableCollection<PortScanRowItem>();
             PortScanChartItems = new ObservableCollection<LineChartItem>();
@@ -227,7 +270,6 @@ namespace Firewall_Status_Display.ViewModels
 
             var candidateEntries = entriesByTime.GroupBy(x => x.IPSrc).Where(y => y.Count() > thresholdPkts);
             var deleteMe = entriesByTime.Where(x => x.IPSrc == "192.241.153.165");
-
 
             var portScanHits = new[] {
                 new  { IP = "", TimeStamp = DateTime.Now, DestPort = 0, Proto = "" }
@@ -375,17 +417,28 @@ namespace Firewall_Status_Display.ViewModels
             PortScanTotalPackets = PortScanEntryList.Sum(x => x.Packets);
             PortScanUniqueIPs = PortScanEntryList?.Select(x => x.IPSrc)?.Distinct()?.Count() ?? 0;
 
-            // Set the pie chart data
+            // Traffic by country tab
+            TrafficByCountryListItems = new ObservableCollection<TrafficByCountryRowItem>();
 
             // Geolocation pie chart
             GeoPieChartItems = new ObservableCollection<PieChartItem>();
             var geoEntries = entriesUnordered.GroupBy(x => x.SrcCountryCode).OrderByDescending(x => x.Count()).ToList();
 
-            // Top 10 source countries
-            for (int x = 0; x < 10; x++)
+            for (int x = 0; x < geoEntries.Count; x++)
             {
-                GeoPieChartItems.Add(new PieChartItem(_dataRepoService.GetCountryNameFrom2DigitCode(geoEntries[x].Key), geoEntries[x].Count()));
+                if (x < 10)
+                    // Top 10 source countries
+                    GeoPieChartItems.Add(new PieChartItem(_dataRepoService.GetCountryNameFrom2DigitCode(geoEntries[x].Key), geoEntries[x].Count()));
+
+                // All entries go into country datagrid
+                TrafficByCountryListItems.Add(new TrafficByCountryRowItem(
+                    _dataRepoService.GetCountryNameFrom2DigitCode(geoEntries[x].Key),
+                    geoEntries[x].Count(),
+                    $"{Math.Round(((double)geoEntries[x].Count() / entriesUnordered.Count) * 100, 2)}%"));
             }
+
+            // Traffic by port tab
+            TrafficByPortListItems = new ObservableCollection<TrafficByPortRowItem>();
 
             // Port pie chart
             PortPieChartItems = new ObservableCollection<PieChartItem>();
@@ -395,7 +448,7 @@ namespace Firewall_Status_Display.ViewModels
                 .OrderByDescending(x => x.Count()).ToList();
 
             // Top 10 destination ports
-            for (int x = 0; x < 10; x++)
+            for (int x = 0; x < 100; x++)
             {
                 var grp = portEntries[x].Key;
                 int port = grp.PortDest;
@@ -410,7 +463,11 @@ namespace Firewall_Status_Display.ViewModels
                 else
                     title = svcName;
 
-                PortPieChartItems.Add(new PieChartItem(title, portEntries[x].Count()));
+                if (x < 10)
+                    PortPieChartItems.Add(new PieChartItem(title, portEntries[x].Count()));
+
+                TrafficByPortListItems.Add(new TrafficByPortRowItem(svcName, port, portEntries[x].Count(),
+                    $"{Math.Round(((double)portEntries[x].Count() / entriesUnordered.Count) * 100, 2)}%"));
             }
 
             // Create labels for pie charts
@@ -419,14 +476,14 @@ namespace Firewall_Status_Display.ViewModels
             var pieChartTotal = GeoPieChartItems.Select(x => x.Value).Sum();
             foreach (var item in GeoPieChartItems)
             {
-                item.Label = $"{item.Title}\n{Math.Round((item.Value/pieChartTotal) * 100,2)}%";
+                item.Label = $"{item.Title}\n{Math.Round((item.Value/ entriesUnordered.Count) * 100,2)}%";
             }
 
             // Port pie chart
             var portPieChartTotal = PortPieChartItems.Select(x => x.Value).Sum();
             foreach (var item in PortPieChartItems)
             {
-                item.Label = $"{item.Title}\n{Math.Round((item.Value / portPieChartTotal) * 100, 2)}%";
+                item.Label = $"{item.Title}\n{Math.Round((item.Value / entriesUnordered.Count) * 100, 2)}%";
             }
 
             // Get our traffic amount
@@ -596,6 +653,35 @@ namespace Firewall_Status_Display.ViewModels
             set
             {
                 portScanTotalPackets = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// List of traffic by port
+        /// </summary>
+        private ObservableCollection<TrafficByPortRowItem> trafficByPortListItems;
+
+        public ObservableCollection<TrafficByPortRowItem> TrafficByPortListItems
+        {
+            get => trafficByPortListItems;
+            set
+            {
+                trafficByPortListItems = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// List of traffic by country
+        /// </summary>
+        private ObservableCollection<TrafficByCountryRowItem> trafficByCountryListItems;
+        public ObservableCollection<TrafficByCountryRowItem> TrafficByCountryListItems
+        {
+            get => trafficByCountryListItems;
+            set
+            {
+                trafficByCountryListItems = value;
                 RaisePropertyChanged();
             }
         }
