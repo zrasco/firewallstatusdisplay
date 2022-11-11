@@ -12,6 +12,7 @@
         <TextBox Text="{Binding Content}"
                  Name="txtBoxSyslog"
                  AcceptsReturn="True"
+                 TextWrapping="NoWrap"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
                  IsReadOnly="True"

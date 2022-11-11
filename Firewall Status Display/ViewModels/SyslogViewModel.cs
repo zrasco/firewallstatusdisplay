@@ -20,7 +20,8 @@ namespace Firewall_Status_Display.ViewModels
 
         private void OnAppendLogCommandExecute(object logEntry)
         {
-            Content += $"{logEntry.ToString()}\r\n";
+            var logLine = logEntry.ToString().Trim();
+            Content += $"{logLine}\r\n";
         }
 
         private string content;

@@ -34,13 +34,14 @@
                             <ColumnDefinition Width="8*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Margin="1,3,1,9" Grid.Column="0" Text="DB server address:"/>
+                            <TextBlock Margin="1,3,1,9" Grid.Column="0" Text="DB server address:" />
                             <TextBlock Grid.Column="0" Text="DB server port:"/>
                             <telerik:RadButton Margin="0,10,0,0" x:Name="btnImportDB" Content="Import DB into firewall view" Command="{Binding ImportDBCommand}"/>
+                            <TextBlock Text="Please note that these settings are read-only. You can change the DB connection string in appsettings.json" TextWrapping="Wrap"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <TextBox />
-                            <TextBox Width="40" HorizontalAlignment="Right"/>
+                            <TextBox IsReadOnly="True" Text="{Binding DBServerAddress}" HorizontalContentAlignment="Right"/>
+                            <TextBox IsReadOnly="True" Width="40" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Text="{Binding DBServerPort}"/>
                         </StackPanel>
                     </Grid>
                 </telerik:RadTabItem>

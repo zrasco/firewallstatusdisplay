@@ -13,5 +13,8 @@ namespace Firewall_Status_Display.Services
         string GetCountryNameFrom2DigitCode(string countryCode);
 
         string GetServiceName(string protocol, ushort port);
+
+        string GetDBAddress();
+        int GetDBPort();
     }
 }

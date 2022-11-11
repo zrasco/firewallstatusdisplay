@@ -86,7 +86,31 @@ namespace Firewall_Status_Display.ViewModels
         {
             Content += $"{logEntry.ToString()}\r\n";
         }
+        
+        public string DBServerAddress
+        {
+            get
+            {
+                return (_dataRepoService != null ? _dataRepoService.GetDBAddress() : "");
+            }
+            set
+            {
+                return;
+            }
+        }
 
+        public int DBServerPort
+        {
+            get
+            {
+                return (_dataRepoService != null ? _dataRepoService.GetDBPort() : 0);
+            }
+            set
+            {
+                return;
+            }
+        }
+        
         private string content;
 
         /// <summary>

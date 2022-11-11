@@ -21,6 +21,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Printing;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -225,11 +226,30 @@ namespace Firewall_Status_Display.Services
                 }
                 else if (item.Contains("IN="))
                 {
-                    retval.In = item.Split("=")[1];
+                    var inStr = item.Split("=")[1];
+
+                    retval.In = inStr;
+
+                    /*
+                    if (inStr.Contains("wan") || inStr.Contains("vlan"))
+                        // Log incoming packets only
+                        retval.In = item.Split("=")[1];
+                    else
+                        // Discard 
+                        return null
+                    */
                 }
                 else if (item.Contains("OUT="))
                 {
-                    retval.Out = item.Split("=")[1];
+                    var outStr = item.Split("=")[1];
+
+                    if (String.IsNullOrEmpty(outStr))
+                        retval.Out = outStr;
+                    else
+                        // Discard dropped outgoing packets
+                        return null;
+
+                    //retval.Out = item.Split("=")[1];
                 }
                 else if (item.Contains("PROTO="))
                 {
@@ -396,7 +416,7 @@ namespace Firewall_Status_Display.Services
 
         public async Task<List<FirewallEntry>> GetAllFirewallEntriesAsync()
         {
-            return await _fwContext.FirewallEntries.ToListAsync();
+                return await _fwContext.FirewallEntries.ToListAsync();
         }
 
         public string GetCountryNameFrom2DigitCode(string countryCode)
@@ -458,6 +478,26 @@ namespace Firewall_Status_Display.Services
                 retval = svcResult.Name;
 
             return retval;
+        }
+
+        public string GetDBAddress()
+        {
+            var sqldb = new SqlConnectionStringBuilder(_fwContext.Database.GetConnectionString());
+
+            return sqldb.DataSource.Split(",")[0];
+        }
+
+        public int GetDBPort()
+        {
+            var sqldb = new SqlConnectionStringBuilder(_fwContext.Database.GetConnectionString());
+            var arr = sqldb.DataSource.Split(",");
+
+            // Check for non-standard port. Otherwise return 1433
+            if (arr.Count() > 1)
+                return Int32.Parse(arr[1]);
+            else
+                return 1433;
+
         }
     }
 }
